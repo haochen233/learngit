@@ -289,9 +289,23 @@
 		当Buffer里的数据被完全读取后，会将写入位置重置到底层
 	数据的开始处。因此只要读写操作平衡，就无需担心内存会持续
 	增长。
-	
-	1、Buffer创建函数、
 		可以使用NewBuffer()和NewBufferString()函数创建Buffer
 	对象，它们分别使用字节切片和字符串对Buffer进行初始化。
-		
 	
+	1、Buffer创建函数
+		(1)、Buffer创建函数、
+			功能是创建一个Buffer， 并使用字节切片buf对他进行
+		初始化。buf可以作为准备要读的数据；也可以用来指定写
+		缓冲区的大小
+			原型如下：
+			func NameBuffer(buf []byte) *Buffer
+		(2)、NewBufferString()函数。
+			NewBufferString()函数的功能是创建一个Buffer，并用
+		字符串s对它进行初始化。通常用来读取已经存在的数据。
+		该函数原型定义如下：
+			func NewBufferString(s string) *Buffer
+		
+	2、Buffer写操作
+		对Buffer对象的写操作放大共有5个：Write()、WriteByte()
+	、WriteRune()、WriteString()和WriteTo方法，下面分别介绍。
+		

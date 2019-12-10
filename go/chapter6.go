@@ -260,4 +260,7 @@ func main() {
 
 		Println(string(w.Bytes()), n, err)
 	*/
+
+	/*Read() test*/
+
 }

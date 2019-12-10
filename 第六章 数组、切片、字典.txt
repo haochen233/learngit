@@ -78,7 +78,7 @@ sdasdasdasd
 	注意：使用多维数组时要注意，多维数组的每一行长度必须一致
 这和切片不一样。
 	
-	需要特别注意的是，在Go语言中数组时一个之类型，所有值类型
+	需要特别注意的是，在Go语言中数组是一个值类型，所有值类型
 在作为函数参数或赋值时，都将产生一次复制动作。因此无法在函数
 中修改数组的值类似（c语言的值传递，但是C语言传递数组，可以修
 该数组元素值，因为c语言数组名就是数组首地址。）。
@@ -262,7 +262,7 @@ sdasdasdasd
 		new函数可以给一个值类型的数据分配内存，调用成功后返回一个
 	初始化的内存块指针，new()函数的原型定义如下：
 		func new(Type) *Type
-		返回一个该类型的内存指针，同事该类型被初始化为"0"。
+		返回一个该类型的内存指针，同时该类型被初始化为"0"。
 		但不用与其他语言，它只是将内存清零，而不是初始化内存。
 	
 	6.4.2 make函数
@@ -294,12 +294,12 @@ sdasdasdasd
 	对象，它们分别使用字节切片和字符串对Buffer进行初始化。
 	
 	1、Buffer创建函数
-		(1)、Buffer创建函数、
+		(1)、NewBuffer创建函数、
 			功能是创建一个Buffer， 并使用字节切片buf对他进行
 		初始化。buf可以作为准备要读的数据；也可以用来指定写
 		缓冲区的大小
 			原型如下：
-			func NameBuffer(buf []byte) *Buffer
+			func NewBuffer(buf []byte) *Buffer
 		(2)、NewBufferString()函数。
 			NewBufferString()函数的功能是创建一个Buffer，并用
 		字符串s对它进行初始化。通常用来读取已经存在的数据。
@@ -309,4 +309,50 @@ sdasdasdasd
 	2、Buffer写操作
 		对Buffer对象的写操作放大共有5个：Write()、WriteByte()
 	、WriteRune()、WriteString()和WriteTo方法，下面分别介绍。
+		（1）Write()方法
+			功能是把字节切片p写入Buffer中。该方法执行结束返回成功
+		写入的字节数和错误类型err，如果返回的n满足n=len(p)，则
+		err总是返回nil，如果数据太大则Write 会panic 并产生Errlarge
+		异常。该方法原型定义如下：
+		func (b *BUffer) Write(p []byte)(n int,err error)
+		参数p是要下入的字节切片。
+		（2）WriteByte()方法。WriteByte（）方法的功能是写入一个
+		字节，总是返回nil，这个返回值只是为了匹配bufio，writer
+		的Wirte函数。如果内部数据太大，WriteByte会panic 并产生Errl
+		arge异常。
+		该方法原型为：
+		func (b *Buffer)WriteByte(c byte)error
+		
+		（3）WriteRune ,把unicode字符的编码写入buffer，并返回
+		字节数n，err总是nil
+		该方法原型为：
+		func (b *Buffer)WriteRune(r rune)(n int, err error)
+		
+		（4）WriteString()，把string类型的字符串写入buffer，
+		该方法原型为：
+		func (b *Buffer)WriteRune(s string)(n int, err error)
+		
+		（5）WriteTo()，把Buffer中的数据写入到I/O对象w中，直到
+		数据为空或者遇到错误，返回值n总是足够用int表示，使用int
+		64类型是为了和io.WriteTo接口匹配，任何写入时遇到的错误
+		都会被返回。
+		该方法原型为：
+		func (b *Buffer)WriteTo(w io.Writer)(n int64, err error)
+		
+	3、Buffer读操作方法
+		对Buffer的读操作方法共有6个：Read()、ReadByte()、ReadByte、
+	ReadBytes()、ReadFrom()、ReadRune()和ReadString方法。
+	
+		（1）Read() ，是从Buffer中读取len(p)个字节，并复制到p中
+		；如果Buffer中未读数据不足len(p)，则把所有的数据都复制到
+		p中。该方法执行完，返回实际读取的字节数n和错误类型err。
+		如果Buffer中没有数据，则err为io.EOF（除非len(p)为0）；否则
+		err为nil。
+		该方法原型定义如下：
+		func (b *Buffer)Read(p []byte)(n int, err error)
+		参数p是用来存放读取结果的字节切片。
+		
+		
+		
+		
 		

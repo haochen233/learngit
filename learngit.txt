@@ -283,14 +283,138 @@ test.txt到Git并且提交：
 	
 -----------------------------------------------------------
 远程仓库：
+	$git remote add origin git@github.com:haochen233/learngit
 	
+远程库的名字就叫origin，这是git默认的叫法
+	$git push -u origin master 把本地库的素有内容推送到远程库上
+
+	
+要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
+
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+
+--------------------------------------------------------------
+
+从远程库克隆
+
+用命令git clone克隆一个本地库：
+$ git clone git@github.com:michaelliao/gitskills.git
 
 
+---------------------------------------------------------------
+创建与合并分支：
+
+首先，我们创建dev分支，然后切换到dev分支:
+$ git checkout -b dev
+
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令：
+
+$ git branch dev
+$ git checkout dev
+
+然后，用$git branch命令查看当前分支：
+
+git branch命令会列出所有分支，当前分支前面会标一个*号。
+
+HEAD严格来说不是指向提交，而是指向master，master才是指向提交，
+所以HEAD指向的就是当前分支。
 
 
+当我们创建新的分支，例如dev时，Git新建了一个指针叫dev，指向
+master相同的提交，再把HEAD指向dev，就表示当前分支在dev上：
 
+从现在开始，对工作的修改和提交就是针对dev分支了，比如新提交
+一次后，dev指针往前移动一步，而master指针不变。
 
+然后，我们就可以在dev分支上正常提交，比如对readme.txt做个修改，加上一行：
 
+Creating a new branch is quick.
+
+现在，dev分支的工作完成，我们就可以切换回master分支：
+
+切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不
+见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有
+变：
+
+现在，我们把dev分支的工作成果合并到master分支上：
+
+$ git merge dev
+
+git merge命令用于合并指定分支到当前分支。合并后，再查看readme
+.txt的内容，就可以看到，和dev分支的最新提交是完全一样的。
+
+注意到上面的Fast-forward信息，Git告诉我们，这次合并是“快进模式”
+，也就是直接把master指向dev的当前提交，所以合并速度非常快。
+
+合并完成后，就可以放心的删除dev分支了：
+
+$git branch -d dev
+
+删除后，查看branch，就只剩下master分支了：
+$ git branch
+
+因为创建、合并和删除分支非常的快，所以Git鼓励你使用分支完成
+某个人物，合并后再删掉分支，这和直接在master分支上工作效果是
+一样的，但过程更安全。
+
+小结
+Git鼓励大量使用分支：
+
+查看分支：git branch
+
+创建分支：git branch <name>
+
+切换分支：git checkout <name>或者git switch <name>
+
+创建+切换分支：git checkout -b <name>或者git switch -c <name>
+
+合并某分支到当前分支：git merge <name>
+
+删除分支：git branch -d <name>
+
+--------------------------------------------------------------
+解决冲突：
+
+当git 无法自动合并分支时。就必须首先解决冲突，在提交，合并完成
+解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提
+交。
+
+用git log --graph 命令可以看到分支合并图。
+
+---------------------------------------------------------------
+分支管理策略：
+
+通常，合并分支时，如果可能，Git会用Fast forward模式，但这种模
+式下，删除分支后，会丢掉分支信息。
+
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的
+commit，这样，从分支历史上就可以看出分支信息。
+
+Git分支十分强大，在团队开发中应该充分应用。
+
+合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史
+有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经
+做过合并。
+
+例如： git merge --no-ff -m "merge with --no-ff" dev
+
+分支策略
+在实际开发中，我们应该按照几个基本原则进行分支管理：
+
+首先，master分支应该是非常稳定的，也就是仅用来发布新版本，平时
+不能在上面干活；
+
+那在哪干活呢？干活都在dev分支上，也就是说，dev分支是不稳定的，
+到某个时候，比如1.0版本发布时，再把dev分支合并到master上，在
+master分支发布1.0版本；
+
+你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，
+时不时地往dev分支上合并就可以了。
+
+---------------------------------------------------------------
+Bug分支 
 
 
 

@@ -118,6 +118,53 @@ func main() {
 
 		f10(1, 2, 3, 4, 5, 6, 7, 8, 9)
 	*/
+
+	//f11(1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+	f13(2, "Go", 8, "language", 'a', false, 'A', 3.14)
+
+}
+
+/*任意类型变参*/
+func f13(args ...interface{}) {
+	var num_Int = make([]int, 0, 6)
+	var num_String = make([]string, 0, 6)
+	var num_Byte = make([]int32, 0, 6)
+	var num_other = make([]interface{}, 0, 6)
+
+	for _, arg := range args {
+
+		switch v := arg.(type) {
+		case int:
+			num_Int = append(num_Int, v)
+			break
+		case string:
+			num_String = append(num_String, v)
+			break
+		case int32:
+			num_Byte = append(num_Byte, v)
+			break
+		default:
+			num_other = append(num_other, v)
+		}
+
+	}
+
+	Println(num_Int)
+	Println(num_String)
+	Println(num_Byte)
+	Println(num_other)
+}
+
+/*声明f11、f12为变参函数*/
+func f11(args ...int) {
+	f12(args...)
+
+	f12(args[:2]...)
+}
+
+func f12(args ...int) {
+	Println(args)
 }
 
 /*指针传递*/

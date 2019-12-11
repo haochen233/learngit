@@ -262,5 +262,86 @@ func main() {
 	*/
 
 	/*Read() test*/
+	/*	buf := []byte("Hello, world")
+		b := bytes.NewBuffer(buf)
+
+		var p [8]byte
+
+		n, err := b.Read(p[:])
+
+		Println(string(p[:]), n, err)
+
+		Println(p)
+	*/
+
+	/*ReadByte() test*/
+	/*	slice1 := []byte("Golang")
+		buf := bytes.NewBuffer(slice1)
+
+		b, err := buf.ReadByte()
+
+		Printf("%c, %v", b, err)
+	*/
+
+	/*ReadBytes() test*/
+	/*	slice1 := []byte("He,llo ,world!")
+
+		b := bytes.NewBuffer(slice1)
+
+		slice, err := b.ReadBytes(',')
+
+		Println(string(slice), err)
+	*/
+
+	/*ReadFrom() test*/
+	/*	slice1 := []byte("adwarfewfazgfrzsdgbzrgb")
+
+		r := bytes.NewBuffer(slice1)
+
+		b := bytes.NewBuffer(nil)
+
+		n, err := b.ReadFrom(r)
+
+		Println(string(b.Bytes()), n, err)
+	*/
+
+	/*ReadRune() test*/
+	/*	slice1 := []byte("中")
+		b := bytes.NewBuffer(slice1)
+		r, n, err := b.ReadRune()
+
+		Println(string(r), n, err)
+	*/
+
+	/*ReadString() test*/
+	/*	buf := []byte("qwertyuiopasdfghjkl")
+
+		b := bytes.NewBuffer(buf)
+
+		str, err := b.ReadString('f')
+
+		Println(str, err)
+
+		Println(b.Len())
+
+		var p [100]byte
+
+		n, err := b.Read(p[:])
+
+		Println(string(p[:]), n, err)
+	*/
+
+	/*Next() test*/
+	/*
+		buf := []byte("Golang")
+
+		b := bytes.NewBuffer(buf)
+
+		Println(string(b.Next(5)))
+		Println(string(b.Next(5)))
+
+		Println(b.Len())
+		Println(string(b.Bytes()))
+	*/
 
 }

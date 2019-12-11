@@ -1,0 +1,405 @@
+﻿6.1  数组
+	6.1.1 数组的声明
+		在声明数组时，必须制定数组名、数组长度和数组类型
+		格式如下：
+			var arrayName [arraySize] dateType
+			
+			说明：
+				（1）数组名的命名规则和变量名相同
+				（2）在定义数组时，需要指定数组中元素的个数
+				（3）一般情况下，数组所有元素的类型必须相同
+				，可以是Go语言的任何基本数据类型
+	
+			例如：var arr1 [5] int
+
+		/*数组的定义*/
+		
+		/*
+			var arr1 [5]int
+
+			for i := 0; i < 5; i++ {
+				arr1[i] = i + 1
+			}
+
+			Println(arr1)
+		*/
+		
+	6.1.2 数组的初始化
+		数组定义好后，如果没有给数组元素指定值，则所有元素自动
+	初始化为0，对数组元素的初始化，可以用这几种方式实现。
+		（1）在定义元素时对数组元素赋初值。例如：
+			var arr1 [10]int{1,2,3,4,5,6,7,8,9,10}
+		（2）可以只给一部分元素赋初值
+			var b = [10] int{1,2,3,4,5}
+		（3）可以有初始化列表决定数组长度
+			var c = [...] int{1,2,3,4,5}
+		（4）还可以按下标初始化元素。例如：
+			var d = [10] int{2:4,5:7}
+			表示给下标为2的元素赋初值4，下标为5的元素赋初值7
+		其余元素默认为0。即d[2]=4,d[5]=7
+	
+	6.1.3 数组元素的访问和遍历
+		访问形式与C语言相同
+	
+		/*打印斐波那契数列*/
+/*
+	var fibo = [20]int{0: 1, 1: 1}
+
+	for i := 2; i < 20; i++ {
+		fibo[i] = fibo[i-2] + fibo[i-1]
+	}
+
+	for i := 0; i < 20; i++ {
+		if i%5 == 0 {
+sdasdasdasd
+			Println("")
+		}
+
+		Printf("fibo[%2d]=%-4d ", i, fibo[i])
+	}
+
+	/*用 for range 也可以遍历*/
+	/*
+		for i, v := range fibo {
+			if i%5 == 0 {
+				Println()
+			}
+
+			Printf("fibo[%2d]=%-4d ", i, v)
+		}
+	*/
+*/
+	
+	6.1.4 多维数组
+	例如：
+		var a[3][4]int 
+			它的每个元素时一个长度为4的一维数组
+	
+	注意：使用多维数组时要注意，多维数组的每一行长度必须一致
+这和切片不一样。
+	
+	需要特别注意的是，在Go语言中数组是一个值类型，所有值类型
+在作为函数参数或赋值时，都将产生一次复制动作。因此无法在函数
+中修改数组的值类似（c语言的值传递，但是C语言传递数组，可以修
+该数组元素值，因为c语言数组名就是数组首地址。）。
+	
+	6、2 切片
+		在Go语言中，切片（Slice）是数组的一个引用，它会生成
+	一个指向数组的指针，并通过切片长度关联到底层数组部分或全
+	部元素。
+	切片的数据结构原型定义如下：
+	struct Slice
+	{
+		byte *array;
+		unit32 len;
+		uint32 cap
+	}
+	
+	由定义来看，它抽象为一下三个部分：
+	（1）指向被引用的底层数组的指针。
+	（2）切片中元素的个数。
+	（3）切片分配的存储空间。
+	
+	6.2.1 切片的声明与创建
+		切片的声明与创建的方法有三种：基于底层数组创建，直接
+	创建或使用make()函数创建
+		1、基于底层数组创建切片
+			在创建切片时，可以基于一个底层数组，切片可以只
+		使用数组的一部分元素或所有元素，甚至可以创建一个比
+		底层数组还要大的数组切片，因为切片可以动态增长。
+		
+		创建格式如下：
+			var sliceName []dataType
+			
+			注意：
+			（1）切片的命名规则和变量名相同
+			（2）在创建切片时，不要指定切片的长度。
+			（3）切片的类型可以是Go语言的任何基本数据类型
+		例如：
+			var slice1 []int
+			上例中定义了一个整形切片slice1，注意不要指定
+		切片长度，否则指定了长度就成了定义数组了。如果没有
+		初始化默认值为nil，而且切片的长度为0，切片的长度用
+		内置函数len来获取，内存容量用内置cap函数来获取
+		
+			当一个切片定义好后，还要对切片进行初始化，这样
+		切片才可用。假如已经定义有一个数组array1，则切片slice1
+		的初始化方式如下：
+			slice1 = array1[start : end]
+		即切片引用的数组元素由array1[start]到array1[end],但不
+		包括array1[end],即c++中容器的begin到end，左闭右开区间
+		。
+			比如 array1[: 5]表示引用数组的前5个元素，array1[5 :]
+		表示引用从array1[5]开始的所有元素，array1[4 : 7]表示引用
+		array1[4]、array1[5]、array1[6],这三个元素。
+		
+			/*	slice1 = array1[:5]
+				slice2 := array1[5:]
+				slice3 := array1[4:7]
+
+				//全部引用的四种形式
+				slice4 := array1[0:10]
+				slice5 := array1[0:len(array1)]
+				slice6 := array1
+				slice7 := array1[:]
+
+				Println(slice1)
+				Println(slice2)
+				Println(slice3)
+				Println(slice4)
+				Println(slice5)
+				Println(slice6)
+				Println(slice7)
+			*/
+		
+		2、直接创建切片
+			直接创建切片，即在定义切片的同时初始化元素，例如：
+			var slice1 = []int{1,2,3,4,5}
+			注意：一定要与数组的初始化 var array1 = [...]int{1,2,3,4,5}
+			区分开。
+		3、	使用make函数创建切片
+			在Go语言中，并不是必须基于底层数组才能创建切片，内置
+		函数make() 可以用于灵活的创建切片。例如：
+			var slice1 = make([]int,5)
+			上式表示，创建了一个有五个元素的整形切片slice1，元素
+		初值为0。
+			在使用make()函数创建切片时，还可以为切片元素预留
+		存储空间。例如：
+			var slice1 = make([]int,5,10)
+			上式表示，创建整型切片slice1，元素个数为5，元素初值
+		为0，并预留10个元素的存储空间。
+		
+		/*直接和使用make创建切片*/
+			
+	/*
+		//直接创建
+		var slice1 = []int{1, 2, 3, 4, 5}
+		//注意：一定要与数组初始化 var array1 = [...]int{1,2,3}区分开来
+		//使用make创建
+		var slice2 = make([]int, 5)
+		//使用make创建并且预留元素存储空间
+		var slice3 = make([]int, 5, 10)
+
+		//输出它们的元素个数size与容量capicity
+		Printf("slice1_len = %d, capicity = %2d %v\n", len(slice1), cap(slice1), slice1)
+		Printf("slice2_len = %d, capicity = %2d %v\n", len(slice2), cap(slice2), slice2)
+		Printf("slice3_len = %d, capicity = %2d %v\n", len(slice3), cap(slice3), slice3)
+	*/
+	
+	6.2.2 切片元素的访问和遍历
+		切片元素的遍历和数组元素的遍历一样，可以用下标访问，
+	也可以用 for range访问。
+		
+		/*切片元素的遍历*/
+		
+		
+	/*
+		var slice1 = []int{1, 2, 3, 4, 5}
+
+		//用下标访问
+		for i := 0; i < len(slice1); i++ {
+			Printf("slice1[%d] = %d", i, slice1[i])
+		}
+
+		Println()
+
+		//用range 访问
+		for i, v := range slice1 {
+			Printf("slice1[%d] = %d", i, v)
+		}
+
+		Println()
+	*/
+			
+	6.2.3 切片的操作
+		
+		
+
+	6.3.2 字典的初始化和创建
+		字典声明好后必须经过初始化或创建才能使用，未初始化
+	或创建的字典值为nil。
+		可以使用"{}"操作符对字典进行初始化或使用make()函数
+	来创建字典。初始化或创建后，就可以使用"="操作符向字典动
+	态增添数据项了。
+		例如：var map1 map[string]int
+				map1["key1"] = 1
+		编译会出错，因为虽然声明了字典map1，但是并没有初始化
+	，所以系统并没有给它分配存储空间，所以不能向map1中添加了。
+		
+		例如：var map1 map[string]int
+				map1 = make(map[string]int)
+				map1["key1"] = 1
+		这样是正确的
+		
+		例如：var map1 map[string]int{}
+				map1["key1"] = 1
+		这样也是正确的
+		
+		使用{}是初始化的，使用mak实质是分配内存的过程。
+	
+	6.3.3 字典的访问操作
+			Value = mapName[Key]
+			其实数组可以看作是键类型为整形的字典。
+		1、字典项查找
+			在Go语言中，要从字典中查找一个特定的键值对，格式如下：
+		v,OK = mapName[Key]
+			如果查找的Key值存在，则将Key对应的Value值赋予v，OK为
+		True；反之不存在，v为0，Ok为false
+		
+		2、字典项删除
+		Go语言提供了内置函数delete()，用于删除容器内的元素。delete
+	函数也可以删除Map中的键值对。
+		例：
+			delete(map1,"key1");
+		上式可以从map1中删除Key1的键值对，如果key1这个键不存在，
+		那么什么都不会发生。
+	
+	6.4 Go语言内存分配机制
+		Go具有两种内存分配机制，分别是使用内置函数new()和make()。
+	它们所做的事不同，所应用到的类型也不同，这可能引起混淆，但
+	规则很简单。
+	6.4.1 new函数
+		new函数可以给一个值类型的数据分配内存，调用成功后返回一个
+	初始化的内存块指针，new()函数的原型定义如下：
+		func new(Type) *Type
+		返回一个该类型的内存指针，同时该类型被初始化为"0"。
+		但不用与其他语言，它只是将内存清零，而不是初始化内存。
+	
+	6.4.2 make函数
+		make()函数用于给引用类型分配内存空间，比如像Slice、Map
+	Channel等 。
+		需注意的是make()函数创建的是一个引用类型对象，而不是一个
+	内存空间的地址
+		原型如下：
+		func make(Type,size IntegerType) Type
+		参数Type必须是一个引用类型；参数size指定要创建的该对象的
+	个数。返回的是一个对象，而非一个内存空间指针，即到底要分配
+	多少内存由该对象的大小和个数来决定。
+	
+	6.5 字节切片标准库
+	//略太多了，这些函数以后用到了慢慢补充。
+	
+	6.5.2 Buffer创建函数及操作方法
+	Buffer创建函数及操作方法
+		在bytes包中，缓冲区（Buffer）是最常用的对字节切片进行
+	IO操作的对象
+		默认情况下Buffer对象没有定义初始值，Buffer使用结构体
+	自带的一个[64]byte数组作为存储空间。
+		当超出限制后，会创建一个2倍的存储空间，并把原来的数据
+	复制过来。
+		当Buffer里的数据被完全读取后，会将写入位置重置到底层
+	数据的开始处。因此只要读写操作平衡，就无需担心内存会持续
+	增长。
+		可以使用NewBuffer()和NewBufferString()函数创建Buffer
+	对象，它们分别使用字节切片和字符串对Buffer进行初始化。
+	
+	1、Buffer创建函数
+		(1)、NewBuffer创建函数、
+			功能是创建一个Buffer， 并使用字节切片buf对他进行
+		初始化。buf可以作为准备要读的数据；也可以用来指定写
+		缓冲区的大小
+			原型如下：
+			func NewBuffer(buf []byte) *Buffer
+		(2)、NewBufferString()函数。
+			NewBufferString()函数的功能是创建一个Buffer，并用
+		字符串s对它进行初始化。通常用来读取已经存在的数据。
+		该函数原型定义如下：
+			func NewBufferString(s string) *Buffer
+		
+	2、Buffer写操作
+		对Buffer对象的写操作放大共有5个：Write()、WriteByte()
+	、WriteRune()、WriteString()和WriteTo方法，下面分别介绍。
+		（1）Write()方法
+			功能是把字节切片p写入Buffer中。该方法执行结束返回成功
+		写入的字节数和错误类型err，如果返回的n满足n=len(p)，则
+		err总是返回nil，如果数据太大则Write 会panic 并产生Errlarge
+		异常。该方法原型定义如下：
+		func (b *BUffer) Write(p []byte)(n int,err error)
+		参数p是要下入的字节切片。
+		（2）WriteByte()方法。WriteByte（）方法的功能是写入一个
+		字节，总是返回nil，这个返回值只是为了匹配bufio，writer
+		的Wirte函数。如果内部数据太大，WriteByte会panic 并产生Errl
+		arge异常。
+		该方法原型为：
+		func (b *Buffer)WriteByte(c byte)error
+		
+		（3）WriteRune ,把unicode字符的编码写入buffer，并返回
+		字节数n，err总是nil
+		该方法原型为：
+		func (b *Buffer)WriteRune(r rune)(n int, err error)
+		
+		（4）WriteString()，把string类型的字符串写入buffer，
+		该方法原型为：
+		func (b *Buffer)WriteRune(s string)(n int, err error)
+		
+		（5）WriteTo()，把Buffer中的数据写入到I/O对象w中，直到
+		数据为空或者遇到错误，返回值n总是足够用int表示，使用int
+		64类型是为了和io.WriteTo接口匹配，任何写入时遇到的错误
+		都会被返回。
+		该方法原型为：
+		func (b *Buffer)WriteTo(w io.Writer)(n int64, err error)
+		
+	3、Buffer读操作方法
+		对Buffer的读操作方法共有6个：Read()、ReadByte()、ReadByte、
+	ReadBytes()、ReadFrom()、ReadRune()和ReadString方法。
+	
+		（1）Read() ，是从Buffer中读取len(p)个字节，并复制到p中
+		；如果Buffer中未读数据不足len(p)，则把所有的数据都复制到
+		p中。该方法执行完，返回实际读取的字节数n和错误类型err。
+		如果Buffer中没有数据，则err为io.EOF（除非len(p)为0）；否则
+		err为nil。
+		该方法原型定义如下：
+		func (b *Buffer)Read(p []byte)(n int, err error)
+		参数p是用来存放读取结果的字节切片。
+		（2）ReadByte(), 从Buffer中读取一个字节并返回如果Buffer中没
+		有可读数据，则err为io.EOF
+		该方法原型定义如下：
+		func (b *Buffer)ReadByte()(b byte, err error)
+		（3）ReadBytes()，从Buffe中读取数据，直到第一次遇到分隔符
+		“delim”，把已读取的数据包括分隔符作为字节切片返回。
+		如果在读取到“delim”之前出现错误，则返回已读取的数据和那个
+		错误。只有返回的数据不以“delim”结尾时，才返回err非空。
+		原型如下：
+		func (b *Buffer) ReadBytes(delim byte)(line []byte, err error)
+		（4）ReadFrom(),是从I/O接口对象r中读取数据，并写入到Buffer中，
+		直到r.Read 返回io.EOF，返回值n为已读取的字节数。
+		原型如下：
+		func (b *Buffer)ReadFrom(r io.Reader)(n int64, err error)
+		（5）ReadRune()，从Buffer中读取一个Unicode字符，同时返回它
+		的UTF-8编码的字节数，若没有数据则返回io.EOF，如果读取的不是
+		UTF-8的字节序列，则读取一个字节并且返回U+FFFD。
+		原型如下：
+		func (b *Buffer)ReadRune()(r rune, err error)
+		（6）ReadString()，读取数据直到遇到分隔符“delim”，并把读取到
+		的数据包含“delim”作为string和遇到的错误（一般是io.EOF）返回。
+		
+	4、其他操作方法
+		对Buffer对象的其他操作方法共有8个：Bytes()、Len()、Next()、
+	Reset()、String()、Truncate()、UnreadByte()、UnreadRune()
+		（1）Bytes()，功能是返回Buffer中未读数据的字节切片，满足
+	len(b, Bytes())= b.len()。如果调用者改变了返回的字节切片的内容
+	，Buffer中未读数据也会被修改。
+		
+		原型如下：
+		func (b *Buffer)Bytes() []byte
+		
+		（2）Len()，功能是返回Buffer中未读数据的字节数。
+		满足如下关系： b.Len() = len(b.Bytes())
+		
+		原型如下：
+		func (b *Buffer)Len() int
+		
+		（3）Next() ，返回Buffer中下n个未读取得字节，本次读取
+		会修改到Buffer中的读取位置。如果Buffer中未读数据不足n
+		字节，则返回全部未读数据。返回的字节切片在下次读写前
+		有效。
+		
+		原型如下：
+		func (b *Buffer)Next(n int) []byte
+		
+		
+		
+		
+		
+		
+		

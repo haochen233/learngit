@@ -1,0 +1,130 @@
+3.1 顺序结构程序设计
+	3.1.1顺序程序设计
+		略
+	3.1.2简单语句
+		表达式语句，表达式加上一个分号。若一行只有一条语句，则可以省略分号。
+	若有多条语句，则用分号隔开
+		函数调用语句与c语言一样
+	3.1.3 复合语句
+			由一对花括号“{}”将多条语句组合在一起构成
+		一般形式为：
+			{
+				[局部变量]
+				操作语句1
+				操作语句2
+				。。。
+			}
+	
+3.2 Go程序语法注意事项
+	3.2.1 Go程序语句和分号的使用
+		Go程序语句末尾没有分号，但正式语法也使用分号终止语句，但 
+	不同的是，这些分号由词法分析器在扫描源代码过程使用简单的规则
+	自动插入，大多数时候不需要用户在末尾加分号
+		通常仅在for循环语句使用分号
+	
+	3.2.2 Go程序语句块和左大括号约定
+		左大括号必须和那些函数或控制结构放在同一行。
+	3.2.3 注释语句
+		略
+3.3 数据输入输出
+	Go语言提供了多种用于实现数据输入、输出的函数，这些函数在fmt包中实现
+	3.3.1 标准输出函数
+		（1）Print()函数
+			功能是按照系统默认格式字符串和参数表，生成一个打印字符串，然后
+		再将其输出到标准输出设备上，输出时会在操作数之间自动加上空格。执行后
+		会返回输出的字节数或错误类型，Print()函数原型定义如下：
+			func Print(a ... interface{})(n int, err error)
+			Print()函数不支持格式化输出，所以像换行这些需要另起一行，来实现
+		换行。
+		（2）Println()函数
+			Println与Print类似，不同的是Println会在输出结束后在自动输出一个
+		换行，Println
+			func Println(a ... interface{})(n int, err error)
+		（3）Printf()函数 
+			前面的Print与Println都是采用默认格式输出
+			Printf是格式化输出，与C语言的printf类似。
+			Go语言提供的格式化字符串类型非常丰富，简单介绍几个
+				格式字符		说明
+				%v				以数据对象的基本格式输出
+				%#v				输出数值的同时输出Go语法表示
+				%T				输出数据类型（如int、float）
+				...
+	3.3.2 标准输入函数
+	
+		1、Scan()函数 
+			从标准输入设备读取数据，并将使用空格分割的连续数据顺序
+		存到参数里，换行也被是为空格
+			返回读取的参数的数量n；
+			如果少于要求提供的参数数量，函数返回err报错。
+			函数原型：
+				func Scan(a ...interface{})(n int, err error)
+		
+		2、Scanln()函数
+			函数原型：
+				func Scanln(a ...interface{})(n int, err error)
+			与Scan类似，但Scanln会在读取到换行符时终止录入数据，
+		并且在录入最后一条数据时必须有换行或结束符
+		
+		3、Scanf()函数
+			函数原型：
+				func Scan(a ...interface{})(n int, err error)
+				按照格式化字符从标准输入设备读取数据
+			和c语言一模一样
+3.4 Strings包
+	3.4.1 字符串查找函数
+		1、Contain()函数用于查找子串是否在指定的字符串中，如果在返回
+		true，否则返回false。contains()函数的原型如下:
+		func Contain(str,substr string) bool
+		
+		2、ContainsAny()函数
+			用于在字符串中查找是否包含某个Unicode编码格式的字符，若
+		包含返回（只要有就成功）true，反之返回false
+		
+		3、ContainsRune() 函数 
+			用于在字符串中查找是否包含某个rune类型的字符。成功返回true
+		失败返回false
+			func ContainsRune(s string, r rune) bool
+		4、Count()函数
+			用于统计子串在指定字符串中出现的次数，成功返回统计结果。
+			原型为：
+				func Count(str,sep string) int
+				
+	3.4.2 字符串比较函数
+		原型：
+			func EqualFold(s,t string) bool 
+			成功返回true，失败返回false
+	3.4.3 字符串位置索引函数
+		判断一个子串在主串中出现的位置索引，可以使用
+		1、Index()
+			判断子串在主串中第一次出现的位置，存在返回int，不存在返回-1
+			原型：
+				func Index(s,sep string) int
+		2、IndexAny()
+			判断chars集中任意一个Unicode字符在主串中第一次出现的位置
+				func IndexAny(s,chars string) int
+		3、IndexFunc()
+				func IndexFunc(s string, f func(rune) bool)int
+				f是一个参数为Unicode字符，返回值为bool的函数。
+				该函数判断字符串中每一个传入f的字符，返回符合函数f的第一个
+			字符的位置。
+		4、IndexRune()
+				func IndexRune(s string, r rune)
+				用于判断某一个Unicode字符在主串中第一次出现的位置，若
+			存在返回int，不存在返回-1
+		5、LastIndex()
+				判断子串在主串中最后出现的位置，存在返回int，不存在返回-1
+				func LastIndex(s,sep string) int
+		6、LastIndexAny()
+				判断chars集中任意一个Unicode字符在主串中最后出现的位置
+				func IndexAny(s,chars string) int
+		7、LastIndexFunc()
+				func LastIndexFunc(s string, f func(rune) bool)int
+				该函数判断字符串中每一个传入f的字符，返回符合函数f的第一个
+			字符的位置。
+、
+	3.4.4 字符串追加和替换函数
+	
+		
+		
+		
+	

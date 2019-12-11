@@ -1,0 +1,165 @@
+	Go语言的循环语句和c语言十分相似，但是Go语言没有C语言中的
+do或while循环，仅适用了for语句就实现了所有循环控制。
+
+5.1 for语句
+	for语句共有三种形式，for基本循环结构，for条件循环结构和
+for无线循环结构。
+	
+	5.1.1 for基本循环结构
+	
+	一般格式如下：
+		for 初始化表达式; 条件表达式; 步进表达式{
+			循环体
+				.
+				.
+				.
+		}
+	
+	除了书写格式外，其他与c/c++一样，就不赘述了，
+	
+	例子5-1 基本循环控制结构的使用，统计单词中的某个字符数
+	
+	5.1.2 for条件循环结构
+		类似于C语言中的while循环语句
+		for 条件表达式 {
+			循环体
+			.
+			.
+			.
+		}
+	/*计算π值*/
+	
+	5.1.3 for无限循环结构
+	for {
+		循环体
+		.
+		.
+		.
+	}
+	退出结构的条件一般由if语句和break语句组成。
+	
+	5.1.4 使用for语句的注意事项
+	（1）for语句的三个表达式之间用';'分隔开，不
+	能使用括号括起来（C语言写法）。
+	（2）左大括号必须与for放在同一行
+	（3）循环变量的名字尽量要短
+	（4）如果使用多个变量，Go语言不支持C语言形式的
+	逗号表达式，必须使用平行赋值的方式初始化多个变量。
+	
+	正确案例：	
+		for i,j := 0,10; i < j; i,j = i+1, j-1 {
+			循环体
+			.
+			.
+			.
+		}
+	错误案例
+		for i := 0,j := 10; i < j; i++,j-- {
+			循环体
+			.
+			.
+			.
+		}
+	
+	/*for循环嵌套，应用案例99乘法表*/
+	/*	for i := 1; i < 10; i++ {
+			for j := 1; j < i+1; j++ {
+				Printf("%d * %d = %2d", j, i, i*j)
+				Print("  ")
+			}
+
+			Println("")
+		}
+	*/
+	
+	5.2 跳转语句
+	break;
+	提前结束循环
+	continue;
+	跳过本次循环
+	
+	和break语句一样，continue语句也可以配合标签（Label），终止
+多级嵌套循环中的某次循环。
+
+	例子：
+		LABEL1:
+			for i := 0; i < 10; i++ {
+				for {
+					continue LABEL1
+				}
+				fmt.Println("OK");
+			}
+		这时每一次continue语句将跳到标签“LABEL1”处继续执行，
+	显然第一层循环会被执行。，程序不会陷入无限循环中。
+	
+	goto语句
+	和break、continue语句不通，goto天生就要和标签（Label）
+配合来使用。goto语句可以调整程序执行的位置，它可以让程序
+无条件跳转到一个标签之处继续执行。
+	格式如下：
+		LABEL:
+			.
+			.
+			.
+		goto LABEL
+		
+		注意标签区分大小写，标签后需要加 ':'
+		
+		goto语句加标签可以实现c语言中的do-while。
+		
+		/*使用标签与goto语句实现0到100求和*/
+		
+		/*
+	   	var i, sum int16 = 0, 0
+
+	   biaoqian1:
+	   	sum += i
+	   	i++
+
+	   	if i < 101 {
+	   		goto biaoqian1
+	   	}
+
+	   	Println(sum)
+	*/
+	
+	使用goto语句和标签也可以跳出无限循环
+	只需将标签放在goto的后面。
+	
+	5.3 for range 语句
+	for语句还可以和range关键字配合，组成for range语句
+for range语句可以对数组（Array）、切片（Slice）等对象
+的元素进行遍历。
+	在Go语言中，range可以看作是一个迭代器，当它被调用
+时，它会从所遍历的数组返回一个键值对（Key-Value Pair）
+。当对数组或切片进行遍历时，range返回数组下标键（Key）
+数组下标所对应的元素作为值（value）。
+
+	/*for range语句对数据对象进行遍历*/
+	
+	/*	var str string = "Golang"
+
+		for k, v := range str {
+			Printf("str[%d] = %c\n", k, v)
+		}
+	*/
+	
+	/*统计字符串中数字个数，字母个数，其他字符个数*/
+	
+	/*	var str string = "13245QWERTasdfg/..m"
+		var num_count, letter_count, other_count int = 0, 0, 0
+
+		for _, v := range str {
+			if v >= 48 && v <= 57 {
+				num_count++
+			} else if (v >= 65 && v <= 90) || (v >= 97 && v <= 122) {
+				letter_count++
+			} else {
+				other_count++
+			}
+		}
+
+		Printf("字符串str中有%d个数字，%d个字母，%d个其他字符\n", num_count, letter_count, other_count)
+	*/
+	
+	

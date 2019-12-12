@@ -153,9 +153,10 @@ func f9(a, b int) (sum, sub int) {
 }
 
 /*变参函数*/
-
 func f10(args ...int) {
 	for _, v := range args {
 		Println(v)
 	}
 }
+
+/*变参的传递*/

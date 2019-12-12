@@ -15,4 +15,7 @@
 4.commit v.提交		5.master n.师傅v.控制  6.branch n.分支
 
 2019/12/10 
-1.panic adj.恐慌的，没有理由的 2.
+1.panic adj.恐慌的，没有理由的 
+
+2019/12/12
+1.field n.字段 2.variable adj.可变的，多变的

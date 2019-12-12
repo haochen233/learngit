@@ -50,4 +50,41 @@ func main() {
 		Println(stu4)
 	*/
 
+	/*嵌入式结构直接定义结构体变量*/
+
+	/*	var usr = struct {
+			id   int
+			name string
+			age  int
+		}{}
+
+		usr2 := struct {
+			id   int
+			name string
+			age  int
+		}{9527, "张晨昊", 21}
+		Println(usr)
+		Println(usr2)
+	*/
+
+	/*	var map1 map[string]int
+
+		map1 = make(map[string]int)
+
+		map1["zhang"] = 61
+		map1["liu"] = 62
+
+		Println(map1)
+	*/
+
+	/*	map1 := map[string]struct {
+			name string
+			id   int
+		}{
+			"first":  {"zhnag", 20},
+			"second": {"liu", 21},
+		}
+
+		Println(map1)
+	*/
 }

@@ -121,11 +121,123 @@ func main() {
 
 	//f11(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
-	f13(2, "Go", 8, "language", 'a', false, 'A', 3.14)
+	//f13(2, "Go", 8, "language", 'a', false, 'A', 3.14)
+
+	/*匿名函数的声明与调用*/
+
+	//声明匿名函数并且赋给变量f
+	/*	f := func(a, b int) int {
+			return a + b
+		}
+
+		//对函数类型变量f进行调用
+		sum := f(10, 56)
+		Println(sum)
+
+		//声明并直接调用匿名函数
+		sum = func(a, b int) int {
+			return a + b
+		}(66, 600)
+
+		Println(sum)
+	*/
+
+	/*函数的闭包*/
+	/*
+		f := closures(624)
+		Println(f(1))
+		Println(f(2))
+	*/
+
+	/*函数递归求斐波那契数列*/
+	/*	var v int = 0
+
+		for i := 0; i < 40; i++ {
+			v = fibo(i)
+
+			Printf("%-10d", v)
+			if (i+1)%5 == 0 {
+				Println()
+			}
+		}
+	*/
+
+	/*defer语句test*/
+	/*	defer Println("I am first")
+		Println("I am second")
+	*/
+
+	/*defer语句,逆序调用（FILO）*/
+
+	/*	for i := 0; i < 5; i++ {
+			defer Println(i)
+		}
+	*/
+
+	//f14()
+	//Println(f15())
+
+	/*panic-and-recover机制*/
+	/*	defer func() {
+			Println("函数defer开始运行")
+			err := recover()
+			if err != nil {
+				Println("程序异常退出：", err)
+			} else {
+				Println("程序正常退出")
+			}
+		}()
+
+		f16(100)
+	*/
 
 }
 
+/*panic*/
+func f16(a int) {
+	Println("函数f16开始运行")
+	if a >= 100 {
+		panic("参数超出范围!")
+	} else {
+		Println("函数f16调用结束")
+	}
+}
+
+/*被延迟的匿名函数会读取外部函数的返回值，并且对外部函数的返回值赋值*/
+func f15() (i int) {
+	defer func() {
+		i++
+	}()
+	i = 1
+	return
+}
+
+/*defer语句声明时的变量的值，就是最后执行defer语句的值*/
+func f14() {
+	i := 0
+	defer Println(i)
+	i = 66
+}
+
+/*求斐波那契*/
+
+func fibo(n int) int {
+	if n <= 1 {
+		return 1
+	} else {
+		return fibo(n-1) + fibo(n-2)
+	}
+}
+
+/*函数闭包,返回值是一个函数类型*/
+func closures(x int) func(int) int {
+	return func(y int) int {
+		return x + y
+	}
+}
+
 /*任意类型变参*/
+
 func f13(args ...interface{}) {
 	var num_Int = make([]int, 0, 6)
 	var num_String = make([]string, 0, 6)
@@ -154,6 +266,7 @@ func f13(args ...interface{}) {
 	Println(num_String)
 	Println(num_Byte)
 	Println(num_other)
+
 }
 
 /*声明f11、f12为变参函数*/
@@ -200,9 +313,10 @@ func f9(a, b int) (sum, sub int) {
 }
 
 /*变参函数*/
-
 func f10(args ...int) {
 	for _, v := range args {
 		Println(v)
 	}
 }
+
+/*变参的传递*/

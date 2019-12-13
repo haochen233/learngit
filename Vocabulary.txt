@@ -19,3 +19,7 @@
 
 2019/12/12
 1.field n.字段 2.variable adj.可变的，多变的
+
+2019/12/13
+1.radius n.半径 2.tag n.标签 v.尾随 3. reflect v.反射，反映
+

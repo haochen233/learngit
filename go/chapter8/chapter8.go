@@ -3,8 +3,11 @@ package main
 
 import (
 	. "fmt"
+	"math"
+	"reflect"
 )
 
+/*
 type student struct {
 	id    int
 	name  string
@@ -12,6 +15,7 @@ type student struct {
 	age   int
 	class string
 }
+*/
 
 func main() {
 
@@ -87,4 +91,138 @@ func main() {
 
 		Println(map1)
 	*/
+
+	/*匿名字段的嵌入*/
+
+	/*	type people struct {
+			name string
+			age  int
+			tall float32
+		}
+
+		type teacher struct {
+
+			//嵌入了一个匿名字段people
+			people
+
+			level int
+			tall  float32
+		}
+
+		type set struct {
+			people
+			int
+			byte
+		}
+
+		var t1 = teacher{people{"李丽", 26, 1.75},
+			3,
+			2.01,
+		}
+
+		var t2 = &teacher{people{"小红", 28, 1.80},
+			5,
+			1.68,
+		}
+
+
+		Println(t1)
+		Println(t2)
+
+		Println(t1.tall)
+		Println(t1.people.tall)
+	*/
+
+	/*Method 与 Method同名*/
+
+	/*	rct1 := rectangle{3, 4}
+		rct2 := rectangle{8, 9}
+
+		Println(rct1.area(), rct2.area())
+
+		Println(math.Pi)
+
+		c1 := circle{2}
+		Println(c1.area())
+	*/
+
+	/*Method的继承*/
+
+	/*	student1 := student{people{"张晨昊", 22},
+			"信息16",
+		}
+		teacher1 := teacher{people{"MT", 29},
+			"yanan",
+		}
+
+		student1.say()
+		teacher1.say()
+	*/
+
+	/*字段标签*/
+
+	/*	type User struct {
+			Id   int    "账号"
+			Name string "姓名"
+			Sex  bool   "性别"
+		}
+
+		u := User{26, "张晨昊", false}
+
+		//使用TypeOf函数获取对象的类型
+
+		t := reflect.TypeOf(u)
+
+		//使用ValueOf获取对象的值
+
+		v := reflect.ValueOf(u)
+
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			Printf("%s (%s=%v)\n", f.Tag, f.Name, v.Field(i).Interface())
+		}
+	*/
+
+}
+
+type people struct {
+	name string
+	age  int
+}
+
+type teacher struct {
+
+	//嵌入了一个匿名字段people
+	people
+	address string
+}
+
+type student struct {
+	people
+	class string
+}
+
+func (p people) say() {
+	Printf("I am %s.I am %d years old\n", p.name, p.age)
+}
+
+func (stu student) say() {
+	Printf("I am %s.I am %d years old, 我是%s班的。\n", stu.name, stu.age, stu.class)
+}
+
+type rectangle struct {
+	width  int
+	height int
+}
+
+type circle struct {
+	radius float64
+}
+
+func (recv circle) area() float64 {
+	return recv.radius * recv.radius * 2 * math.Pi
+}
+
+func (recv rectangle) area() int {
+	return recv.width * recv.height
 }

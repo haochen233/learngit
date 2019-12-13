@@ -1,0 +1,30 @@
+9.1 接口的概念与定义
+	GO语言最重要的特性之一就是提供了接口，它让面向对象，内容组织
+的实现非常方便。Go语言的接口的概念并不同于其他面向对象程序设计语言。
+	
+	9.1.1 接口的概念
+		简单的说，Interface是一组Method的组合，可以通过Interface
+	来定义对象的一组行为。如果某个对象实现了某个接口的所有方法，
+	就表示它实现了该“接口”。
+		
+	9.1.2 接口的定义
+		基本格式如下：
+			type interfaceName Interface{
+				methodName(参数列表)(返回值列表)
+				methodName(参数列表)(返回值列表)
+				.
+				.
+				.
+			}
+		Interface的定义和struct比较类似，但是Interface是一个
+	方法的集合，里面没有其他类型变量，而且Method只用定义原型
+	而不用实现。
+	
+		注意：
+		（1）在Go语言中，Interface命名时习惯以“er”结尾，如：
+		Printer、Reader、Writer等，常以动名词命名。
+		（2）在Go语言中，一个Interface中包含的Method不宜过多，
+		一般0——3个即可。
+		（3）一个Interface可以被任意的对象实现；相同地，一个对
+		象可以实现多个接口。
+		

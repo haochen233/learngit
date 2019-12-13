@@ -136,5 +136,342 @@
 			需要在最后一个元素初始化后加逗号','。
 
 8.3 匿名字段
+	Go语言还支持只提供类型，而不写字段名的定义方式，这就是匿名
+字段，匿名字段是将结构体或指针嵌入到另一个结构体中，但并不提供
+字段名，也被称为嵌入字段。。匿名字段的嵌入并不是继承，Go语言没
+有继承的概念。
+
+	例如：
+	type people struct {
+		name string
+		age  int
+	}
+
+	type teacher struct {
+
+		//嵌入了一个匿名字段people
+		people
+
+		level int
+	}
+	
+	teacher将包含people的所有字段。
+	
+	8.3.1 匿名字段的初始化
+		在初始化结构体成员时，依然要把匿名字段的成员当做一个
+	常的字段来赋值。
+	
+	例如：
+		对上例中teacher变量的初始化
 		
+		var t1 = teacher{people{"李丽", 26},
+		3,
+	}	
+		对teacher对象的初始化
+		var t2 = &teacher{people{"小红", 28},
+	
+		输出结果为：
+		{{李丽 26} 3}
+		&{{小红 28} 5}
 		
+	8.3.2 匿名字段的访问
+		
+		依然使用'.'操作符访问。
+	
+	8.3.3 匿名字段的多种形式
+		在Go语言中，除了结构体本身外，其他所有内置类型和自定义
+	类型都可以作为匿名字段。
+		
+	8.3.4 匿名字段的重名问题
+		1、
+		如果匿名字段中有跟外部字段重名的，则可以通过匿名字段类型
+	作为前缀访问。
+		如：
+			type people struct {
+				name string
+				age  int
+				tall float32
+			}
+
+			type teacher struct {
+
+				//嵌入了一个匿名字段people
+				people
+
+				level int
+				tall  float32
+			}
+		
+		var t1 = teacher{people{"李丽", 26, 1.75},
+			3,
+			2.01,
+		}
+		
+	如果访问tall，那么优先访问外部的tall字段。
+	如果要访问匿名字段的tall字段，那么就需要
+	加上匿名字段的前缀来访问。
+	例如：
+		t1.people.tall 
+		这样访问的就是重名的匿名字段的字段。
+		
+	
+		2、如果是同一层匿名字段重名，比如俩int匿名字段
+	那么此时就会编译出错。
+	
+	8.3.5 匿名类型指针
+		匿名字段还可以作为指针类型嵌入到结构体中，访问方式和
+	直接嵌入匿名字段相同。
+
+		例如：
+			type people struct {
+				name string
+				age  int
+			}
+
+			type teacher struct {
+
+				//嵌入了一个匿名字段*people
+				*people
+
+				level int
+			}
+			
+		t1 := teacher{&people{"李丽", 26},
+			3,
+		}
+		
+		t1.age
+		t1.name
+		t1.level
+
+8.4 方法
+	
+	8.4.1 结构化程序设计思想
+		Go语言是同时支持结构化和面向对象设计思想的一门静态语言
+	，从某种程度上来讲用结构化方法开发的软件，其稳定性、可修改
+	性和可重用性都比较差。
+		因为结构化的本质是功能分解，从代表目标系统整体功能的单个
+	处理着手，自顶向下不断把复杂的处理分解为字处理。
+	
+		然而，用户需求的变化大部分是针对“功能”的，因此这种变化
+	对于基于过程的设计来说是灾难性的。
+	
+	8.4.2 面向对象程序设计思想
+		1、对象
+			在Go语言里，对象可以是最简单的内置数据类型，或者是
+		复杂的结构体。对象不仅能表示具体的事物，还能表示抽象的
+		规则、计划或事件。
+		
+		2、对象的状态
+			每一个对象都具有状态，对象通常用树枝描述它的状态。
+		
+		3、对象的操作
+			在Go语言中，对对象的操作称为Method方法，Method就是
+		在接收者（Receiver）对象。
+		
+	8.4.3 Method的基本定义
+		GO语言的Method类似于一个函数，只是函数名前多了个绑定类型
+	参数————receiver。
+		Method的定义格式如下：
+		func (recv receiver_type) methodName(参数列表)(返回值){
+			.
+			.
+			.
+		}
+	
+		Method中的Receiver可以是内置类型、自定义类型、结构体类型
+	或指针类型。
+	
+	例子：
+	type rectangle struct{
+		width 	int
+		height 	int
+	}
+	
+	func (recv rectangle) area() int {
+		return recv.width * recv.height
+	}
+	
+	func main(){
+		rct1 := rectangle{3, 4}          
+		rct2 := rectangle{8, 9}          
+										 
+		Println(rct1.area(), rct2.area())
+	}
+	
+	//result：12,72
+	
+	8.4.4 多个Method可以同名
+	（1）在定义Method时，多个Method可以同名，但是如果接受者不同，
+	那Method就不一样。
+	
+	（2）如果普通的类型作为Receiver，它只是一个值传递；而指针
+	类型作为Receiver，它将是一个引用传递。所以指针作为Receiver
+	会对实例对象的内容可以发生操作（即修改对象的状态）。
+	（3）Method可以访问接收者的字段。
+	
+	8.4.5 指针作为Recevier
+		如果普通的类型作为Receiver，它只是一个值传递；而指针
+	类型作为Receiver，它将是一个引用传递。因为是引用传递所以
+	可以在Method中修改对象的字段。
+		就不做例子了，可以自己尝试。
+	
+	8.4.6 匿名Receiver
+		如果方法代码不使用Receiver参数，那么就可以省略Receiver
+	的变量名，此时的接收者将是一个匿名Receiver
+		
+		两个匿名Recevier，一个为普通类型，一个为指针类型，这种
+	情况下，方法名不能相同，否则编译会出错。
+	
+	8.4.7 Method的继承
+		通过匿名字段可以实现字段继承。
+		在GO语言中Method也是可以继承的。如果匿名字段实现了一个
+	Method，那么包含这个匿名字段的struct对象也能调用Method。
+	
+		例子：
+			type people struct {
+				name string
+				age  int
+			}
+
+			type teacher struct {
+
+				//嵌入了一个匿名字段people
+				people
+				address string
+			}
+
+			type student struct {
+				people
+				class string
+			}
+	
+				
+			student1 := student{people{"张晨昊", 22},	
+				"信息16",	
+			}	
+			teacher1 := teacher{people{"MT", 29},	
+				"yanan",	
+            }
+				
+			student1.say()	
+	        teacher1.say()
+			
+	8.4.8 Method的重写
+		如果student想要实现自己的say方法，可以采用Method
+	重写的方法来解决。
+		即定义一个同名的Method，然后接收者为student。
+		这时再调用say，就调用的是重写过的Method，把原本的
+	匿名字段的方法隐藏了；
+
+8.5 可见性规则和struct的导入
+	和调用函数一样，有时也需要从外部包导入一个struct，那么
+外部定义struct时也要遵循可见性规则。
+	
+	8.5.1 可见性规则
+		Go语言中药使包内的某个标识符对其他包可见，该标识符的
+	首字母必须大写，这就是Go语言的可见性规则。
+		就不多赘述了。自己试验。
+	8.5.2 struct的导入	
+		要使用一个外部的struct，首先要导入外部包，
+		格式如下：
+			import "./pack_directory/pack_name"
+		导入外部包后，引用和访问外部包格式：
+			pack_name.struct_name
+			
+8.6 字段标签
+	Go语言允许为字段定义标签，
+	struct中的不同字段不仅可以根据字段名和类型区分，还可以通过
+字段标签来区分。
+	字段标签通常用于程序使用手册的书写。或者作为一些重要的标记符。
+	Go语言中不允许在普通程序中访问字段标签，字段标签只能使用
+反射（Reflect）包中提供的特殊方法读取。
+	利用Reflect可以读取字段名、字段类型和字段值。
+	
+8.7 数据I/O对象及操作
+	Go语言标准库bufio包，实现了对数据I/O接口的缓冲功能。
+	它封装于接口io.ReadWriter、io.Reader和io.Writer中。
+	并对应创建对象ReadWriter、Reader或Writer，在实现缓冲
+	的同时实现了一些文件基本io操作
+	
+	8.7.1 ReadWriter对象
+		该对象可以对数据I/O接口io.ReadWriter进行输入输出
+	缓冲操作，定义如下：
+		type ReadWriter struct{
+			* Reader
+			* Writer
+		}
+	
+	可以使用NewReadWriter()函数创建对象。
+		函数原型声明如下：
+		func NewReadWriter(r *Reader, w *Writer) *ReadWriter
+	在该函数中，参数r是要读取得来源Reader对象；参数w是要写入的
+	目的对象。
+	
+	8.7.2 Reader对象
+			
+		结构定义如下：
+			type Reader struct{
+				
+			}
+		默认情况下Reader对象没有定义初始值，输入缓冲区最小值是
+	16.超出限制后，会创建一个二倍的空间。
+	
+		1、Reader对象创建函数
+			（1）NewReader() 函数
+			按照默认长度创建Reader对象
+			原型如下：
+			func NewReader(rd io.Reader) *Reader 
+			（2）NewReaderSize
+			可以指定缓冲区长度。
+			原型如下：
+			func NewReaderSize(rd io.Reader, size int) *Reader
+			
+		2、Reader对象操作方法
+			（1）Read()方法，读取数据，并放到字节切片中，返回
+			已读取的字节数。
+			原型如下：
+				func (b *Reader) Read(p []byte) (n int, err error)
+			（2）ReadByte() ，读取一个字节
+			原型如下：
+				func (b *Reader) ReadByte() (c byte, err error)
+			
+			.
+			.
+			.
+			跟Buffer对象类似的读。
+		
+	8.7.3 Writer对象 
+		1、Writer对象创建函数
+			（1）NewWriter() 函数
+			按照默认长度创建Writer对象
+			原型如下：
+			func NewWriter(rd io.Writer) *Writer 
+			（2）NewWriterSize
+			可以指定缓冲区长度。
+			原型如下：
+			func NewWriterSize(rd io.Writer, size int) *Writer
+		
+		2、Writer对象操作方法
+			介绍几个比较独特的方法
+			（1）Available()，功能是返回缓冲区中未使用的字节数
+			原型如下：
+			func (b *Writer)Available() int
+			（2）Buffered()，功能是返回已写入当前缓冲区中的字节数
+			原型如下：
+			func (b *Writer) Buffered() int
+			（3）Flush()，功能是把缓冲区中的数据写入底层的io.Writer
+			，并且返回错误信息。如果成功写入，error返回nil，否则返回
+			错误原因。
+			原型如下：
+			func (b *Writer)Flush() error
+			（4）Write()，功能是把字节切片写入到缓冲区，返回以
+			写的字节数。
+			原型如下：
+			func (b *Wirter)Write(p []byte) (nn int, err error) 
+			
+	 
+	 
+	 
+	 
+                                                      	

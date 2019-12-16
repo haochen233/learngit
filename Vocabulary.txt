@@ -23,3 +23,9 @@
 2019/12/13
 1.radius n.半径 2.tag n.标签 v.尾随 3. reflect v.反射，反映
 
+2019/12/16
+1.patch n.补丁，碎片v.修补，打补丁 2.trace n.踪迹 n.追踪
+3.copyright n.版权 4.corporation n.公司 5.meta 
+6.context n.环境，上下文 7.stateless n.无国籍，无状态
+
+

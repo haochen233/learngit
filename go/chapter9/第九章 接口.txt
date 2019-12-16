@@ -28,3 +28,210 @@
 		（3）一个Interface可以被任意的对象实现；相同地，一个对
 		象可以实现多个接口。
 		
+		在Go语言中，任何数据类型都默认实现了空接口Interface，空
+	接口可以这样定义：
+		interface{}
+		
+		空接口就是包含0个Method的Interface，所以可以使用空接口，
+	定义任意类型的值作为参数，如果一个函数返回interface{}，就可
+	以返回任意类型的值。
+	
+9.2 接口执行机制和赋值
+	在Go语言中，接口作为一种引用类型，是可被实例化的类型，当定义一个
+接口类型的变量时
+	
+	9.2.1 接口执行机制 
+		接口对象由两部分组成：Itab指针和data指针
+	struct Iface
+	{
+		Itab *tab
+		void *data;
+	}
+	
+		Itab依据data类型创建，存储了接口调用的元数据信息，其中包括data
+	类型所有符合接口签名的方法地址列表。使用接口对象调用方法时，就从It
+	ab中查找所对应的方法，并将* data作为Receiver参数传递给该方法，从而
+	完成实际目标方法的调用。
+		编译器在构建Itab时，会区分T和*T方法集，并从中获取方法的地址指
+	针。
+		目标方法必须在接口实现的方法集中，接口方法集规则如下：
+		（1）T仅拥有属于T类型的方法集，而*T 则同时拥有T和*T的方法集
+		（2）基于T实现方法，表示同时实现了interfance(T)和interface(*T)
+		（3）基于*T实现方法，那就只实现了interface(*T)
+		个人经验比对：这就相当于c++中访问权限问题，即普通对象可以访问
+		const成员函数和非const成员函数，但是const对象只能访问const成员
+		函数。
+	
+	9.2.2 接口的赋值
+		如果定义了一个Interface的变量，那么这个变量里面可以存储实现这
+	Interface的任意类型的对象。
+		例子：
+			type People struct {
+				Name string
+			}
+
+			type Student struct {
+				People
+				class string
+			}
+
+			type Teacher struct {
+				People
+				WorkType string
+			}
+
+			//定义接口Speaker和Learner
+			type Speaker interface {
+				Speak()
+			}
+
+			type Learner interface {
+				Speaker
+				Learn()
+			}
+
+			func (p People) Speak() {
+				Println("I am a people")
+			}
+
+			func (s Student) Speak() {
+				Println("I am a student")
+			}
+			func (t Teacher) Speak() {
+				Println("I am a teacher")
+			}
+
+			func (s Student) Learn() {
+				Println("I am a Student ,I like to study")
+			}
+			
+			func main(){
+				people := People{"张三"}
+				teacher := Teacher{People{"李丽"}, "英语"}
+				student := Student{People{"李四"}, "软件"}
+
+				var is Speaker
+
+				is = people
+				is.Speak()
+
+				is = teacher
+				is.Speak()
+
+				is = student
+				is.Speak()
+
+				var il Learner
+
+				il = student
+				il.Learn()
+			}
+		因为接口类型能够同时持三种类型的对象，可以定义一个Speaker接口
+	类型的切片，用来存储这几种类型的对象。
+		个人经验理解：
+			这相当与c++中的多态，利用基类指针数组可以存储不同派生类指
+		针。
+			下例就像当年做画图板时候的栈。
+		
+		例如：
+			ix := make([]Speaker, 3)
+			ix[0], ix[1], ix[2] = people, student, teacher
+			for i, _ := range ix {
+				ix[i].Speak()
+			}
+		
+9.3 匿名字段和接口转换
+	超集的定义为：如果一个集合S2中的每一个都在集合S1中，且集合S1可能包
+含S2中没有的元素，则集合S1就是S2的一个超集，那么S2就是S1的真子集。
+	子集的定义为：对于两个非空集合S1与S2，如果集合S1的任何一个元素都是
+集合S2的元素，就说S1包含于S2，称集合S1是集合S2的子集。
+	超集的接口往往能被转换成子集的接口，这样字节就可以使用自己的方法
+访问超集对象实例。
+	
+	9.3.1 匿名字段方法
+		在Go语言中，接口同样支持由Struct匿名字段实现的方法，因为外层结
+	构"继承"了匿名字段的方法集。匿名字段方法集规则如下：
+		（1）如果S嵌入匿名类型T，则S方法集包含T方法集
+		（2）如果S嵌入匿名类型*T，则S方法集包含*T的方法集（T和*T方法）
+		（3）如果S嵌入匿名类型T或*T，则*S方法集包含了*T的方法集
+	
+	就不举例了
+	
+	9.3.2 接口转换
+		超集的接口还可以转换成子集的接口。
+		个人经验分析：
+			就像c++中定义一个派生类对象，可以将该派生类对象赋给基类对
+		象。
+			类似于赋值兼容规则。
+		
+		拥有超集的接口还可以被转换成子集的接口，这样子集就很容易的访问
+	超集对象中的成员变量或者数据。
+		
+9.4 接口类型推断
+	通过接口的赋值可知，接口类型变量里面可以存储任意类型的数值（该类型
+	实现了接口）
+	
+	那么如何反向的知道接口类型变量里面实际保存的是哪一种类型的对象呢？
+	利用接口类型推断，可以判断接口对象是否具有某个具体的接口或者类型
+，有两种常用的方法可以进行接口类型推断：Comma-ok断言和Switch测试。
+	
+	9.4.1 Comma-ok断言
+		使用该断言可以进行接口类型查询，格式如下：
+		value, ok := element.(T)
+		
+		例子：
+		people := People{"张三"}                                     
+		teacher := Teacher{People{"李丽"}, "英语"}                     
+		student := Student{People{"李四"}, "软件"}                     
+		ix := make([]Speaker, 3)                                   
+		ix[0], ix[1], ix[2] = &people, student, &teacher           
+		for i, _ := range ix {                                     
+			ix[i].Speak()                                          
+		}                                                          
+																   
+		for i, v := range ix {                                     
+																   
+			if _, ok := v.(*People); ok {                          
+				Printf("ix[%d] : %v, It is a type *People\n", i, v)
+			} else if _, ok := v.(Student); ok {                   
+				Printf("ix[%d] : %v, It is a type Student\n", i, v)
+			} else if _, ok := v.(*Teacher); ok {                  
+				Printf("ix[%d] : %v, It is a type Teacher\n", i, v)
+			}                                                      
+																   
+		}                                                          
+		
+	9.4.2 Switch 测试
+		格式如下：
+		switch value := element.(type){
+			case int:
+			case string:
+			case float32:
+			.
+			.
+			.
+		}
+		需要注意的是：element.(type)语法只能在Switch语句中使用。
+	
+9.5 反射
+	反射（Reflection）是Go语言获取程序运行时类型信息的方式。
+	程序员可以利用这些类型信息进行一些更加灵活的处理工作。
+	
+	Go语言标准库的reflect包中提供了Typeof()和Valueof函数，可以使用这
+两个函数从interface{}接口对象中获取实际目标对象的类型和值信息。
+	
+	9.5.1 获取原对象的Type和value值
+		Type和Value是Go语言reflect包中最重要的两个类型，对所有接口进行
+	反射操作，都可以得到一个包含Type和Value的信息结构，Type是被反射对
+	象的类型信息，Value是被反射对象得值信息，使用TypeOf函数获取类型信
+	息，ValueOf函数获取值信息。
+		这两个函数原型定义如下：
+		func TypeOf(i interface{})Type
+		func ValueOf(i interface{})Value 
+		
+		如果调用TypeOf(nil)，则返回nil
+		如果调用ValueOf(nil)，则返回0
+		
+		
+		
+		

@@ -243,3 +243,4 @@ func f3() interface{} {
 	Println("this is f3,返回一个任意类型参数")
 	return "中国"
 }
+

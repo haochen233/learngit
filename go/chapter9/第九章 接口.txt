@@ -240,6 +240,39 @@
 		如果调用TypeOf(nil)，则返回nil
 		如果调用ValueOf(nil)，则返回0
 		
+	9.5.2 修改原对象的Value值
+		利用反射可以修改原数据对象的Value值，在Go语言中，要利用反射修
+	改原数据对象的Value值。在Go语言中，要利用反射修改原数据对象的前提
+	是该对象是“可修改属性的”。使用CanSet()方法判断一个对象是否可修改属
+	性。
+		原型如下：
+		func (v Value) CanSet() bool
+		如果某对象可以修改，CanSet返回true，不可以修改则返回false，并
+	panic错误。
+		要想在函数中对变量本身进行修改。必须使用引用类型，即指针。所以
+	要使用反射修改原对象的值，在使用interface{}接口进行传递时，这个int
+	erface{}必须是指针类型的。另外，要想操作目标对象，还要使用Elem()方
+	法进一步获取指针指向的实际目标。
+		 reflect.Elem() 方法获取这个指针指向的元素类型。这个获取过程被称为取元素，等
+	效于对指针类型变量做了一个*操作
+	9.5.3 动态调用原对象方法
+		利用反射除了前面说的可以提取对象的Type与Value、修改原对象的Val
+	ue值。还能利用反射“动态”调用原对象的方法。
+		reflect包中提供了Call()方法可以用于调用原对象方法。
+		原型定义如下：
+			func (v Value) Call(in []Value) []Value
 		
+		Call()方法可以向原对象传递参数列表并调用它，例如：
+			if len(in) == 3{
+				v.Call(in)
+			}
+		如果调用成功，返回正常结果，如果调用非方法类型，则Call（）会引
+	发panic错误事件。
+		一个原对象通常会有多个方法，怎样才能调用到指定的方法呢？可以使
+	用reflect包中的MethodByName()方法来获取想要的方法的Value值，
+		原型如下：
+			func (v Value) MethodByName(name string) Value
+		成功返回该方法的Value值，如果访问的方法不存在，会返回0。
+	
 		
 		

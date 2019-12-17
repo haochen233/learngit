@@ -170,29 +170,118 @@ func main() {
 	*/
 
 	/*获取原对象的Type和Value值*/
+	/*
+		var pi float32 = 3.14
 
-	var pi float32 = 3.14
+		t := reflect.TypeOf(pi)
+		v := reflect.ValueOf(pi)
 
-	t := reflect.TypeOf(pi)
-	v := reflect.ValueOf(pi)
+		var stu *Student
 
-	var stu *Student
+		t1 := reflect.TypeOf(stu)
 
-	t1 := reflect.TypeOf(stu)
+		f := func() {
+			//...
+		}
+		t2 := reflect.TypeOf(f)
 
-	f := func() {
-		//...
-	}
-	t2 := reflect.TypeOf(f)
+		ff := f2
+		t3 := reflect.TypeOf(ff)
 
-	ff := f2
-	t3 := reflect.TypeOf(ff)
+		Println(t.Kind())
+		Println(t, v)
+		Println(t1)
+		Println(t2)
+		Println(t3)
+	*/
+	/*
+		var person Person = Person{"张三",
+			17,
+			true,
+		}
 
-	Println(t, v)
-	Println(t1)
-	Println(t2)
-	Println(t3)
+		Println(person)
+
+		SetValue(&person)
+
+		Println(person)
+	*/
+	/*
+		per := Person{"张晨昊",
+			21,
+			false,
+		}
+
+		v := reflect.ValueOf(per)
+
+		mv := v.MethodByName("Say")
+
+		args := []reflect.Value{reflect.ValueOf("English"), 12, true}
+
+		mv.Call(args)
+	*/
+	/*
+		var p = &Person{"张晨昊",
+			21,
+			false,
+		}
+
+		typeofp := reflect.TypeOf(p)
+		Printf("name :'%v', kind : '%v' \n", typeofp.Name(), typeofp.Kind())
+
+		typeofp = typeofp.Elem()
+
+		Printf("element name : '%v', Element kind: '%v'\n", typeofp.Name(),
+			+typeofp.Kind())
+	*/
+
+	/*通过类型信息创建实例*/
+	/*	var a int
+		typeofa := reflect.TypeOf(a)
+		ains := reflect.New(typeofa)
+
+		Println(ains.Type(), ains.Kind())
+	*/
+
 }
+
+type Person struct {
+	Name string
+	Age  int
+	Sex  bool
+}
+
+func (p Person) Say(str string) {
+	Printf("I am %s, I like %s\n", p.Name, str)
+}
+
+/*反射修改原对象Value值*/
+/*
+func SetValue(src interface{}) {
+	v := reflect.ValueOf(src)
+
+	if v.Kind() != reflect.Ptr {
+		Println("cannot set")
+		return
+	} else {
+		v = v.Elem()
+	}
+
+	for i := 0; i < v.NumField(); i++ {
+		switch v.Field(i).Kind() {
+		case reflect.String:
+			v.Field(i).SetString("张晨昊")
+		case reflect.Int:
+			v.Field(i).SetInt(21)
+		case reflect.Bool:
+			v.Field(i).SetBool(false)
+		}
+	}
+
+
+
+}
+*/
 
 /*
 type Base struct {
@@ -222,6 +311,8 @@ func (d Derived) DerivedInfo() {
 	Println(d)
 }
 
+
+
 */
 
 /*空接口*/
@@ -243,4 +334,3 @@ func f3() interface{} {
 	Println("this is f3,返回一个任意类型参数")
 	return "中国"
 }
-

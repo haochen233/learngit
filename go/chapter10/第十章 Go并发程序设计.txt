@@ -212,8 +212,257 @@
 			c2 := chan <-(c1)
 			c3 := <- chan(c1)
 			
-			//c1为双向，c2为只读，c3为只写
+			//c1为双向，c2为只写，c3为只读
+			注意接收即为写，发送即为读。
 	
+	双向channel可以转化为单向channel（实参是双向的，形参是单向的）
+	
+	10.3.7 异步Channel
+		前面的学习创建的都是不带Buffer的Channel，这种做法只适合于传递
+	单个数据的应用场合，以及Goroutine之间的同步。
+		而对需要持续传输大量数据的应用场合就不使用了。
+		对于在Goroutine间传递大量数据的应用，可以使用异步通道，从而达
+	到消息队列的效果。
+		
+		异步Channel就是给Channel设定一个Buffer。
+		在Buffer未写满的情况下，不阻塞发送（读取），在Buffer未读完之前
+	，不阻塞接收（写入）操作。这里的Buffer是指被缓冲的数据对象的数量，
+	而不是内存的大小。
+		创建一个带Buffer的Channel，只需要在调用make()函数时，将缓冲区
+	的大小作为第二个参数传入即可。
+		格式如下：
+		make(chan int, 1024)
+		该例创建了一个大小为1024的int类型Channel，在缓冲区写满之前都不
+	会阻塞。
+	
+10.4 Select 机制和超时机制
+	与网络编程中的select比较类似。
+	如果有多个Channel需要监听，就可以使用Select机制，随机处理一个可用
+的Channel。
+	Select机制有比较多的限制，其中最大的一条是每一个case必须是I/O操作
+。Select机制的基本结构如下。
+	select{
+		case <- chan1:
+		//如果chan1成功读取数据，则进行该case处理语句
+		case <- chan2:
+		//如果chan2成功读取数据，则进行该case处理语句
+			.
+			.
+			.
+		default:
+		//如果上面都没有成功，则进入default处理流程。
+	}
+	select不像Switch语句，后面并不带判断条件，而是直接检测case语句。每
+个case语句都必须是一个面向Channel的操作。
+		使用举例：
+		ch1 := make(chan int)         
+		ch2 := make(chan string)      
+		lock := make(chan bool)       
+									  
+		go func() {                   
+			for {                     
+				select {              
+				case v, ok := <-ch1:  
+					if !ok {          
+						lock <- true  
+						break         
+					}                 
+					Println("ch1:", v)
+									  
+				case v, ok := <-ch2:  
+					if !ok {          
+						lock <- true  
+						break         
+					}                 
+					Println("ch2:", v)
+				}                     
+			}                         
+		}()                           
+									  
+		ch1 <- 66                     
+		ch2 <- "中国"                   
+		ch1 <- 88                     
+		ch2 <- "niubi"                
+		ch2 <- "2020"                 
+		ch2 <- "全面小康"                 
+		close(ch1)                    
+		close(ch2)                    
+		<-lock                        
+	
+		再次强调，类似range和检测Channel关闭操作，如果手动关闭Channel
+	会出现错误，因为你不关闭它就一直在遍历。
+	
+	select机制的基本过程如下：
+	（1）当所有被监听的Channel中都无数据，Select会一直等到其中一个有
+	数据为止。
+	（2）当多个被监听Channel中都有数据时，select会随机选择一个执行。
+	（3）当所有被监听的Channel中都无数据，且有default子句，则default
+	会被执行。
+	（4）如果想监听多个Channel，需要使用for语句协助。
+		
+	10.4.2 超时机制
+		在Go语言并发编程的通信过程中，所有错误处理都由超时机制来完成
+		Go语言没有提供直接的超时处理机制，但可以利用Select机制解决超时
+	问题。
+		例子：
+			ch := make(chan int)              
+			timeout := make(chan bool)        
+											  
+			go func() {                       
+				time.Sleep(5 * time.Second)   
+				timeout <- true               
+			}()                               
+											  
+			select {                          
+			case <-ch:                        
+			case <-timeout:                   
+				Println("timeout...")         
+		
+		另外Go语言的time包中还提供了After、Tick等函数，它们也可以返回
+	计时器Channel，利用它们也可以实现超时机制。
+		例子：
+		ch := make(chan int)
+		lock := make(chan bool)
+
+		go func() {
+			for {
+				select {
+				case <-ch:
+				case <-time.After(5 * time.Second):
+					Println("timeout")
+					lock <- true
+				}
+			}
+		}()
+
+		<-lock
+		
+10.5 Runtime Goroutine
+	在执行一些高并发的计算任务时，为了尽量利用高性能服务器多核心的特点
+，将计算任务并行化，从而达到降低总计算时间的目的，在Go语言的Runtime包
+中提供了几个与Goroutine相关的函数，例如 Gosched()、NumCPU()、Goexit()
+等，这些函数可以对Goroutine进行控制，或者获取CPU信息。
+	10.5.1 出让时间片
+		在设计并发任务时，用户可以在每个Goroutine中控制何时主动让出时
+	间片给其他Goroutine，这可以使用Gosched函数来实现。Gosched类似于pyt
+	hon中的yield，让出当前Goroutine的执行权限，调度器会安排其他等待的
+	任务去运行，并在下轮时间片再从该位置恢复执行。
+		
+	例子：
+	//Goroutine1
+	go func() {
+		for i := 0; i < 100; i++ {
+			if i == 2 {
+				runtime.Gosched()
+			}
+
+			Println("Goroutine 1:", i)
+		}
+	}()
+
+	//Goroutine2
+	go func() {
+		Println("Goroutine2")
+	}()
+
+	time.Sleep(5 * time.Second)
+	
+	10.5.2 获取CPU核心数和任务数
+		有时为了将多个并发执行的Goroutine分配给不同的CPU核心去完成，用
+	户就需要知道CPU核心的具体数目。为此，runtime包提供了NumCPU()函数可
+	以去完成这个任务。
+		为了观察系统任务调度情况，还可以使用NumGoroutine()函数返回正在
+	执行和排队的任务总数。
+	例子：
+		Println("CPU number:", runtime.NumCPU())
+		Println("Goroutines start:", runtime.NumGoroutine())
+		
+		//创建一些Goroutine
+		for i := 0; i < 5; i++ {
+			go func(n int) {
+				Println(n, runtime.NumGoroutine())
+			}(i)
+		}
+
+		time.Sleep(5 * time.Second)
+		Println("Goroutines over:", runtime.NumGoroutine())
+		
+	拉开！
+	拉开！
+	拉开！
+	重点来了。
+	关于Channel有无缓冲的问题
+	还是上面的例子，我想使用一个Channel来同步那些创建的Goroutine，此时
+我创建的是一个无缓冲Channel，默认size为1。
+	Println("CPU number:", runtime.NumCPU())
+	Println("Goroutines start:", runtime.NumGoroutine())
+	
+	ch := make(chan int)
+	ch <- 1
+	
+	//创建一些Goroutine
+	for i := 0; i < 5; i++ {
+		go func(n int) {
+			<-ch
+			Println(n, runtime.NumGoroutine())
+			ch <- 1
+		}(i)
+	}
+	
+	time.Sleep(5 * time.Second)
+	Println("Goroutines over:", runtime.NumGoroutine())
+	
+	看似这样的同步操作没问题，但是会报错，报错信息为;
+	fatal error:all goroutines are asleep - deadlock!
+	显示所有Goroutine都已经睡眠了（阻塞）
+	
+	为什么呢？
+	因为我们创建的是无缓冲的Channel，当我们往里面写入数据时，一定要有
+	其他的协程能够读取你写入的数据，否则就会一直阻塞到写入数据的位置
+	导致不能够执行下面的操作。
+	
+	我们创建的Goroutine的操作在插入数据之后，就导致了阻塞，我们还不能
+	创建那些Goroutine。
+	
+	解决方法是：
+	（1）可以将创建Goroutine的操作放在阻塞之前，这样就不会阻塞了。
+	（2）还可以创建有缓冲长度为1的Channel，因为先写入一个即使满了也不
+	会阻塞，但是已经满了的情况下，再写入一个就会阻塞了。
+	
+	总结下，都是长度为1的Channel，无缓冲，写入一个后必须有其他的协程(
+Goroutine)来取出数据，不然会阻塞到写入那儿。
+	有缓冲长度为1，写入一个后，不用等待其他协程(Goroutine)来读取，因为
+他是异步的，但是如果继续向其中写入的话，也是会阻塞的。
+
+	10.5.3 终止当前Goroutine
+		如果要强行终止一个Goroutine的执行，可以调用Goexit函数来完成。
+	Goexit将终止这个堆栈链，并在内层退出，但是defer语句仍然被执行。
+	
+	
+	本章小结：Go语言最大的特点就是从语言层面就支持并发设计，这是它具有
+活力和生命力的最大特征。因为现代程序设计技术的发展发现就是平台都是多核心的、任务都是高并发的，比如正在迅猛发展的云计算。所以Go语言其实就是顺应现代计算机发展的一个必然产物。它的目标是尽可能在静态语言和动态语言之间取得一个最大的优势互补。
+
+
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+
 	
 	
 	

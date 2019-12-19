@@ -29,5 +29,6 @@
 6.context n.环境，上下文 7.stateless n.无国籍，无状态
 
 2019/12/19
-1.schedule n.时间表，计划表 v.安排
+1.schedule n.时间表，计划表 v.安排 2.parse v.解析
+
 

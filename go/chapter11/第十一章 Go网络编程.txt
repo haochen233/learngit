@@ -104,5 +104,299 @@
 			参数net表示网络类型，可以是"ip"、"ip4"、"ip6"，参数addr
 		可以是IP地址或域名，如果是IPv6地址则必须用"[]"括起来
 		
-			失败了会返回错误（非nil），成功返回nil
+			失败了会返回错误（非nil），成功返回nil。
 			
+	11.2.2 主机信息查询
+		函数ResolveIPAddr()虽然可以利用主机名获取一个主机IP地址，但是
+	大多数网络中的主机都拥有多个IP地址，因为在一块NIC上可以绑定多个IP
+	地址。
+		1、主机地址信息查询
+			可以使用LookupHost()函数查询主机更为详尽的信息，它能利用本
+		地查询器获取主机信息。
+			原型如下：
+			func LookupHost(host string) (addrs []string, err error)
+			参数host是字符串型的主机名，成功返回数组格式的主机地址列表
+		否则返回一个错误类型。
+		
+		2、主机正式名查询
+			在主机的多个名字中，有一个会被标记为“canonical”，即主机正
+		式名。可以使用函数LookupCNAME()查询。
+			原型如下：
+			func LookupCNAME(name string)(cname string, err error)
+	
+	11.2.3 服务信息查询
+		
+		1、SRV记录查询
+			SRV是DNS服务器的数据库中支持的一种资源记录的类型，它记录了
+		哪台计算机提供了哪个服务这么一个简单信息。
+			资源记录把服务名字映射为提供服务的服务器名字。
+			活动目录客户和域控制器使用SRV资源记录决定域控制器的IP地址
+			函数 LookupSRV()可以查询SRV信息，
+			原型如下：
+			
+			func LookupSRV(service, proto, name string) (cname string
+			, addrs []*SRV, err error)
+			
+			参数service表示服务名，参数proto表示通信协议（TCP或UDP），
+		参数name是主机域名。
+			成功会返回主机正式鸣和SRV地址列表，否则返回一个错误类型。
+			
+		2、服务端口查询
+			函数LookupPort()可以用来查询服务端口号，
+			原型如下：
+			
+			func LookupPort(network, service string)(port int, err 
+			error)
+			
+			参数network是网络类型，参数service是服务类型，比如WWW服务
+		、FTP服务、Telent服务等。
+			成功返回端口号，否则返回一个错误类型。
+			
+11.3 网络编程原理
+	使用Go语言编写网络程序时，它和传统的BSD socket或WinSock网络编程形
+式不一样。
+	
+	11.3.1 Socket网络编程
+		传统的Socket网络编程分为：流式套接字、数据包套接字、原始套接字
+	几大类。
+		基本步骤略、
+	
+	11.3.2 Go网络编程
+		Go语言标准库对传统Socket编程的过程进行了封装，无论期望用什么形
+	式的连接，都只需调用Dial()函数即可。
+		原型如下：
+		func Dial(net, addr string)(Conn,error)
+	
+		该函数中，参数net是网络协议名，参数addr是IP地址或域名，而端口
+	号以":"的形式跟随在地址或域名的后面，端口是可选的。
+		成功返回一个连接对象，否则返回一个错误类型。
+		
+		例子：
+			//建立一个TCP连接，主机地址为192.168.0.1，port为5000
+			conn,err := net.Dial("tcp", "192.168.0.1:5000")
+
+			//建立一个UDP连接，主机地址为192.168.0.2，port为5001
+			conn,err := net.Dial("udp", "192.168.0.2:5001")
+			
+			//建立一个ICMP连接，主机域名为www.baidu.com,省略端口号
+			conn,err := net.Dial("ip4:icmp", "www.baidu.com")
+			
+			//建立一个ICMP连接，主机地址为119.75.218.77,省略端口号
+			conn,err := net.Dial("ip4:1", "119.75.218.77")
+		
+		目前，Dial支持一下几种网络协议：“tcp”、“tcp4”（仅限IPv4）、
+	“tcp6”（仅限IPv6）、“udp”、“udp4”、“udp6”、“ip”、“ip4”、“ip6”
+		在成功建立连接后就可以进行数据的发送接收了。发送数据时，使用
+	conn对象的Write()成员方法，在接收数据时，可以使用conn对象的Read()
+	成员方法。
+
+11.4 TCP网络程序设计
+	
+	TCP网络编程中，服务器或客户机的地址使用TCPAddr地址结构体表示。
+	该结构体包含两个字段：IP和Port定义如下：
+	type TCPAddr struct{
+		IP IP
+		Port int
+	}
+	
+	函数REsolveTCPAddr()可以把网络地址转换为TCPAddr地址结构，该函数
+	原型如下：
+	
+	func REsolveTCPAddr(net, addr string)(* TCPAddr, error)
+	
+	参数net是网络协议名，参数addr是IP地址或域名，如果是IPv6则必须使用
+“[]”括起来。端口号以":"的形式跟随在地址或域名的后面，端口是可选的。
+还有一种特例，对于HTTP服务器，当主机地址为本地测试地址时，可以直接使用
+端口号作为TCP连接地址，例如“:80”
+
+	成功返回一个指向TCPAddr结构体的指针，否则返回一个错误类型。
+	
+	TCPAddr地址对象还有两个方法：Network()和String()，Network用于返回
+TCPAddr对象的网络协议名，例如“tcp”，String可以将TCPAddr地址转换为字符
+串类型：
+	定义如下：
+	func (a *TCPAddr)Network()string
+	func (a *TCPAddr)String()string
+	
+	与ResolveIPAddr一样成功err为nil！！！！
+	
+	11.4.2 TCPConn对象
+		在进行TCP网络编程时，客户机和服务器是通过TCPConn对象实现连接的
+	TCPConn是Conn接口的实现，TCPConn对象绑定了服务器的网络协议和地址信
+	息，TCPConn对象定义如下：
+		type TCPConn struct{
+			//NULL
+		}
+		
+		Read()方法和Write()方法的原型定义如下：
+		func (c *TCPConn)Read(b []byte)(n int, err error)
+		func (c *TCPConn)Write(b []byte)(n int, err error)
+		
+		成功返回接收或者发送的字节数，失败返回一个错误类型。
+		
+		注意这两个方法的执行都会引起阻塞。
+		
+	11.4.3 TCP服务器设计
+		Go语言使用Go语言编写网络程序时，它和传统的BSD socket或WinSock
+	网络编程形式不一样。
+		（1）TCP服务器首先注册一个公知端口，然后调用ListenTCP()函数在
+	这个端口创建一个TCPListener对象，在该对象上监听客户机的连接请求。
+		（2）启用ListenTCP对象的Accept()方法接受客户端的连接请求。并
+	返回一个协议相关的Conn对象，在这里就是TCPConn对象。
+		（3）返回了一个新的TCPConn对象，服务器就可以调用Read或Write方
+	法来与客户机进行首发数据了。
+		TCPListener对象、ListenTCP函数的原型定义如下：
+		type TCPListener struct{
+			//
+		}
+		
+		func ListenTCP(net string, laddr *TCPAddr)(*TCPListener,error)
+		参数net是网络协议名，laddr是服务器本地地址。
+		
+		成功后返回一个TCPListener对象；调用失败，返回一个错误类型。
+		
+	TCPListener对象的Accept方法定义如下：
+		
+		func (l *TCPListener)Accept()(c Conn, err error)
+		
+		在通信过程中，如果还想获取双方的地址信息，可以使用LocalAddr方
+	法和RemoteAddr方法来完成，方法定义如下：
+		
+		func (c *TCPConn)LocalAddr() Addr
+		func (c *TCPConn)RemoteAddr() Addr
+	
+	11.4.4 TCP客户机设计
+		TCP客户机的工作过程如下：
+		（1）TCP客户机在获取了服务器的服务端口号和地址后，可以调用Dial
+		TCP()函数向服务器发出连接请求，成功返回TCPConn对象。
+		（2）客户机调用TCPConn对象的Read和Write方法与服务器进行通信。
+		（3）通信完成后，客户机调用Close()方法关闭连接。
+		
+		DialTCP函数的原型如下：
+	func DialTCP(net string, laddr,raddr *TCPAddr)(* TCPConn, error)
+		参数net是网络协议名，laddr是本地地址，可以设为nil。参数raddr是
+	对方主机地址，必须指定不能省略。
+		成功返回TCPConn对象，否则返回一个错误类型。
+		
+		方法Close()的原型如下：
+		func (c *TCPConn)Close() error
+		
+		成功关闭TCPConn连接，失败返回一个错误类型。
+		
+	11.4.5 使用Goroutine实现并发服务器
+		我们以前的服务器设计采用循环服务器设计模式，设计简单但缺陷明显
+	。因为这种服务器一旦启动，就一直阻塞监听客户机的连接，直至服务器关
+	闭。所以，循环服务器很耗费系统资源。	
+
+		解决办法是采用并发服务器模式，在这种模式中，对每一个客户端的连
+	接请求都创建一个新的进程、线程或协程进行响应，而服务器还可以去处理
+	其他任务。
+		我们接下来使用Goroutine（协程）实现并发服务器端。
+		
+		循环服务器同时只能服务一个客户端，其他客户端必须等待，而并发
+	服务器端每服务一个客户端就会开辟新的协程来处理，而主协程一直用来
+	监听。
+	
+11.5 UDP网络程序设计
+	略、
+	
+	11.5.1 UDPAddr地址结构体
+		在进行UDP网络编程时，服务器或客户端的地址使用UDPAddr地址结构体
+	表示，UDPAddr包含两个字段：IP和Port，形式如下：
+		type UDPAddr struct{
+			IP IP
+			Port int
+		}	
+		
+		函数ResolveUDPAddr可以把网络地址转换为UDPAddr地址结构，该函数
+	原型定义如下：
+		func ResolveUDPAddr(net, addr string)(*UDPAddr, error)
+		
+		与TCP类似。
+		
+		成功返回UDPAddr对象，否则返回一个错误类型。
+		
+		同样也有String方法和NetWork方法，分别返回地址的字符型类型，和
+	协议的字符串类型。
+	
+	11.5.2 UDPConn 对象
+		在进行UDP网络编程时，服务器和客户端之间是通过UDPConn对象实现连
+	接的，UDPConn是Conn接口的实现。UDPConn对象绑定了服务器的网络协议和
+	地址信息。定义如下：
+		type UDPConn struct{
+			//空结构
+		}
+	
+		UDP并不能保证通信的可靠性和有序行、这些都需要由程序员来处理，
+	为此，TCPConn对象提供了ReadFromUDP()方法和WriteToUDP()方法的原型
+	定义如下：
+	func (c *UDPConn)ReadFromUDP(b []byte)(n int,addr *UDPAddr,err er
+	ror)
+	func (c *UDPConn)WriteToUDP(b []byte)(int,error)
+	
+		ReadFromUDP方法调用成功后返回接收的字节数和发送方地址，否则返
+	回错误类型。
+		WriteToUDP方法调用成功后返回发送的字节数。否则返回错误类型。
+	
+	11.5.3 UDP服务器设计
+		（1）UDP服务器首先注册一个公知端口，然后调用ListenUDP()函数在
+		这个端口上创建一个UDPConn对象，并在该对象上和客户端建立不可靠
+		连接。
+		（2）使用ReadFromUDP和WriteToUDP方法进行通信。
+		（3）不管上一次通信是否正常或完成，UDP服务器依然会接受下一次连
+		接请求。
+		
+		函数ListenUDP()原型如下：
+		func ListenUDP(net string, laddr *UDPAddr)(&UDPAddr, error)
+		
+		成功返回UDPConn对象，否则返回一个错误类型。
+	
+	11.5.4 UDP客户端设计
+		（1）调用DialUDP()函数向服务器发出连接请求。
+		（2）请求连接的一放（客户端）使用Write发送，其他使用WritetoUDP
+		和ReadFromUDP发送或接受。
+			因为客户端调用DialUDP返回的是connected UDPConn对象，已经建
+		立好了，所以不能使用WriteToUDP发送，
+		（3）通信完成后，客户机调用Close关闭UDPConn连接
+	
+11.6 IP网络设计
+	IP是Internet网络层的核心协议，它是一种不可靠、无连接的通信协议。T
+CP、UDP都是在IP的基础上实现的协议，所以IP属于一种底层协议，它可以直接
+对网络数据包进行处理。另外，通过IP用户还可以实现自己的网络服务协议。
+
+	11.6.1 IPAddr地址结构体
+		在进行IP网络编程时，服务器或客户机的地址使用IPAddr地址结构体
+	表示，IPAddr结构体只有一个字段IP，形式如下：
+		type IPAddr struct{
+			IP IP
+		}	
+		
+		IP网络编程属于一种底层网络程序设计，它可以直接对IP包进行处理，
+	所以IPAddr地址中没有端口号。
+	
+		函数ResolveIPAddr()可以把网络地址转为IPAddr地址结构。
+		原型如下：
+		func ResolveIPAddr(net, addr string)(*IPAddr, error)
+		
+		成功返回IPAddr对象，否则返回一个错误类型。
+		
+	同样的有String和Network两个方法，分别得到地址和协议的字符串。
+	
+	11.6.2 IPCoon对象
+		在进行IP网络编程时，客户端和服务器之间是通过IPConn对象实现连接
+	的，IPConn对象定义如下：
+		type IPConn struct{
+			//空结构
+		}
+	
+		由于IPConn是一个无连接的通信对象，所以IPConn对象提供了ReadFrom
+	IP()方法和WriteToIP()方法，用于数据通信。
+		原型如下：
+		func (c *IPConn)ReadFromIP(b []byte)(int, *IPAddr, error)
+		func (c *IPconn)WriteToIP(b []byte, addr *IPAddr)(int, error)
+		
+		ReadFromIP成功返回字节数和发送方地址。否则返回错误类型。
+		WriteToIP成功返回发送的字节数。否则返回错误类型。
+		
+	11.6.3 IP服务器设计
+		

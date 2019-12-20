@@ -31,4 +31,6 @@
 2019/12/19
 1.schedule n.时间表，计划表 v.安排 2.parse v.解析
 
+2019/12/20
+1.canonical adj.公认的，准确的  2.fatal adj.致命的
 

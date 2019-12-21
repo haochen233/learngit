@@ -399,4 +399,18 @@ CP、UDP都是在IP的基础上实现的协议，所以IP属于一种底层协�
 		WriteToIP成功返回发送的字节数。否则返回错误类型。
 		
 	11.6.3 IP服务器设计
+		（1）IP服务器使用指定的协议簇和协议，调用ListenIP()函数创建一
+		个IPCoon连接对象，并在该对象和客户端间建立不可靠连接。
+		（2）建立连接后，使该对象的ReadFromIP()方法和WriteToIP()方法相
+		互通信。
+		（3）如果通信结束后，使用对象的Close()方法关闭IPCoon连接。
+		
+		函数ListenIP()原型为：
+		func ListenIP(netproto string, laddr *IPAddr)(*IPConn, error)
+		
+		参数netproto是“网络类型+协议名”或“网络类型+协议号”，中间用“：”
+	隔开，比如“IP4:IP” 或“IP4:4”，参数laddr是服务器本地地址，
+		成功返回IPConn对象，失败返回一个错误类型。
+		
+	
 		

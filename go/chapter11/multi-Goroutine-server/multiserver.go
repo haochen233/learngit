@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	service := "127.0.0.1:9190"
+	service := "192.168.174.1:9190"
 
 	//将字符串类型的地址与端口转换成TCPAddr类型的
 	tcpaddr, err1 := net.ResolveTCPAddr("tcp", service)

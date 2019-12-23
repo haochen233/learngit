@@ -285,7 +285,7 @@
 	常量iota自动递增1，，通过常量组初始化规则与iota可以达到枚举效果
 	。
 	例如;
-		const{
+		const(
 			Sunday 		= iota //0
 			Monday		= iota	//1
 			Tuesday		= iota //2
@@ -293,11 +293,11 @@
 			Thursday	= iota //4
 			Friday		= iota //5
 			saturday 	= iota //6
-		}
+		)
 		
 		另外如果按行递增，可以省略后续的iota关键字。所以上例还可以定义
 	如下:
-		const{
+		const(
 			Sunday 		= iota //0
 			Monday		= 	//1
 			Tuesday		=  //2
@@ -305,7 +305,7 @@
 			Thursday	=  //4
 			Friday		=  //5
 			saturday 	=  //6
-		}
+		)
 			
 	2.6.2 iota使用规则
 		常量组中每定义一个常量iota自动递增1，而每遇到一个const关键字
@@ -397,11 +397,11 @@
 	2.8.2 中文类型名
 		由于Go支持UTF-8编码格式，所以在定义类型别名时还可以使用非英文字符。
 		例：
-			type{
+			type(
 				小数 float32 
 				整数 uint32 
 				文本 string
-			}
+			)
 	
 	2.9 类型转换
 			Go语言是安全的，即它不允许数据类型隐式转换，否则会造成精度丢失

@@ -42,3 +42,7 @@
 
 2019/12/23
 1.usage n.用法；惯例
+
+2019/12/24
+1.pattern n.模式 2.scheme n.计划，方案 3.anchor n.锚 4.form n.方式
+，形式 5.chain n.链，枷锁，舒服

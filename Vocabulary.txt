@@ -46,3 +46,7 @@
 2019/12/24
 1.pattern n.模式 2.scheme n.计划，方案 3.anchor n.锚 4.form n.方式
 ，形式 5.chain n.链，枷锁，舒服
+
+2019/12/25
+1.vendor n.卖主，供应商 2.vendored code n.第三方代码 3.relative adj.相对的
+n.亲戚 4.offset v.抵消n.偏移量

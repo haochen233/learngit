@@ -1,0 +1,241 @@
+Go 语言中，为了方便开发者使用，将 IO 操作封装在了如下几个包中：
+
+	io 为 IO 原语（I/O primitives）提供基本的接口
+	io/ioutil 封装一些实用的 I/O 函数
+	fmt 实现格式化 I/O，类似 C 语言中的 printf 和 scanf	
+	bufio 实现带缓冲I/O
+
+1.1 io-基本的io接口
+	在 io 包中最重要的是两个接口：Reader 和 Writer 接口。本章所提到的各种
+IO 包，都跟这两个接口有关，也就是说，只要满足这两个接口，它就可以使用 IO 
+包的功能。
+	
+	1.3 Reader接口
+	Reader接口的定义如下;
+	type Reader interface{
+		Read(p []byte) (n int, err error)
+	}
+	功能是读取len(p)个字节读取到p中。
+	
+	在所有需要Reader接口类型的地方，都可以使用实现了该接口的类型的对象
+	比如：
+	
+	func ReadFrom(reader io.Reader, num int) ([]byte, error){
+		p := make([]byte, num)
+		n,err := reader.Read(p)
+		if n > 0{
+			return p[:n], nil
+		}
+		
+		return p, err
+	}
+	
+	ReadFrom 函数将 io.Reader 作为参数，也就是说，ReadFrom 可以从任意的
+地方读取数据。只要来源实现了io.Reader接口。
+	
+	1.4 Writer接口
+		
+		定义如下：
+			type Writer interface{
+				Write(p []byte) (n int, err error)
+			}
+		将len(p)个字节的数据从p中读取到基本数据流中
+	
+	1.5 实现了io.Reader接口或实现了io.Writer接口的类型
+		初学者看到函数参数是一个接口类型，很多时候有些束手无策，不知道该
+	怎么传递参数。还有人问：标准库中有哪些类型实现了 io.Reader 或 io.Wri
+	ter 接口？
+		我自己再io.go中并没有找到几个（不常见的）实现了这两个接口的类型。
+		
+		而其他包中有这些类型都实现了这一个或两个接口：
+		
+		os.File 同时实现了 io.Reader 和 io.Writer
+------------------------------------------------------------------------		
+		strings.Reader 实现了 io.Reader
+------------------------------------------------------------------------
+		bufio.Reader/Writer 分别实现了 io.Reader 和 io.Writer
+------------------------------------------------------------------------		
+		bytes.Buffer 同时实现了 io.Reader 和 io.Writer
+------------------------------------------------------------------------	
+		bytes.Reader 实现了 io.Reader
+------------------------------------------------------------------------		
+		compress/gzip.Reader/Writer 分别实现了 io.Reader 和 io.Writer
+------------------------------------------------------------------------		
+		crypto/cipher.StreamReader/StreamWriter 分别实现了 io.Reader 和
+------------------------------------------------------------------------
+		io.Writer
+		crypto/tls.Conn 同时实现了 io.Reader 和 io.Writer
+------------------------------------------------------------------------		
+		encoding/csv.Reader/Writer 分别实现了 io.Reader 和 io.Writer
+------------------------------------------------------------------------		
+		mime/multipart.Part 实现了 io.Reader
+------------------------------------------------------------------------		
+		net/conn 分别实现了 io.Reader 和 io.Writer(Conn接口定义了Read/Wr
+		ite)
+------------------------------------------------------------------------		
+		
+	1.6	ReaderFrom和WriterTo接口
+		io包中还有这两个接口
+		定义分别如下：
+		type ReaderFrom interface {
+			ReadFrom(r Reader) (n int64, err error)
+		}
+		从r中读取数据放入源对象（该类型实现的ReadFrom）
+		
+		type WriterTo interface {
+			WriteTo(w Writer) (n int64, err error)
+		}
+		从源对象(该类型实现了WriterTo)读取数据写入w中
+	
+	1.8 Seeker接口
+		定义如下：
+		type Seeker interface{
+			seek(offset int64, whence int) (int64, error)
+		}
+		
+		Seek 设置下一次 Read 或 Write 的偏移量为 offset，
+		它的解释取决于 whence： 0 表示相对于文件的起始处，
+		1 表示相对于当前的偏移，而 2 表示相对于其结尾处。 
+		Seek 返回新的偏移量和一个错误，如果有的话。
+		
+	1.9 Closer接口
+		定义如下：
+		type Closer interface{
+			Close() error
+		}
+		
+		用于关闭数据流。
+		
+		小提示
+
+		初学者容易写出这样的代码：
+
+		file, err := os.Open("studygolang.txt")
+		defer file.Close()
+		if err != nil {
+			...
+		}
+		
+		当该文件不存在或找不到时。flie.Close()会panic，因为file找不到，所
+	err不为空。因此应该将file.Close()放在错误检查之后。
+		
+	1.10 其他接口
+		io.ByteReader和io.ByteWriter
+		
+		定义分别如下：
+		type ByteReader interface{
+			ReaderByte()(c byte, err error)
+		}
+		读一个字节
+		
+		type ByteWrite interface{
+			WriteByte(c byte)  error
+		}
+		写一个字节
+			
+	1.13 PipeReader和PipeWriter类型
+		定义分别如下：
+		
+		PipeReader（一个没有任何导出字段的 struct）是管道的读取端。它实
+	现了 io.Reader 和 io.Closer 接口。
+		type PipeReader struct{
+			p *pipe
+		}
+		关于 PipeReader.Read 方法的说明：从管道中读取数据。该方法会堵塞，
+	直到管道写入端开始写入数据或写入端被关闭。
+	
+		PipeWriter（一个没有任何导出字段的 struct）是管道的写入端。它实
+	现了 io.Writer 和 io.Closer 接口。
+		type PipeWriter struct {
+			p *pipe
+		}
+		关于 PipeWriter.Write 方法的说明：写数据到管道中。该方法会堵塞，
+	直到管道读取端读完所有数据或读取端被关闭。
+	
+		io.Pipe() 用于创建一个同步的内存管道 (synchronous in-memory pipe)
+	，函数签名：
+		func Pipe() (*PipeReader, *PipeWriter)
+		
+		正因为是同步的，因此不能在一个 goroutine 中进行读和写。
+	
+	1.14 Copy和CopyN函数
+		Copy函数的函数签名：
+		func Copy(dst Writer, src Reader) (Written int64, err error)
+		将src复制到dst上
+		如果dst实现了ReaderFrom接口那么相当于使用dst.ReadFrom(src)方法
+		若 src 实现了 WriterTo 接口，其复制操作可通过调用 src.WriteTo
+		(dst) 实现。
+		
+		CopyN函数的签名：
+		func CopyN(dst Writer, src Reader, n int64) (writtem int64, err error)
+	
+	1.15 ReadAtLeast 和 ReadFull 函数
+		ReadAtLeast 函数的签名：
+		func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error)
+		ReadAtLeast将r读取到buf中，直到读了最少 min 个字节为止。
+		如果少于min个字节，会返回错误。
+		
+		ReadFull 函数的签名：
+		func ReadFull(r Reader, buf []byte) (n int, err error)
+		将 buf读满。如果读取未满返回错误。
+		
+	1.16 WriteString函数
+		这是为了方便写入 string 类型提供的函数，函数签名：
+		func WriteString(w Writer, s string) (n int, err error)
+		
+		函数文档：
+		WriteString 将s的内容写入w中，当 w 实现了 WriteString 方法时，会
+	直接调用该方法，否则执行 w.Write([]byte(s))。
+	
+	1.17 MultiReader 和 MultiWriter 函数
+		这两个函数的定义分别是：
+		func MultiReader(readers ...Reader) Reader
+		func MultiWriter(writers ...Writer) Writer
+		
+		它们接收多个 Reader 或 Writer，返回一个 Reader 或 Writer。我们可
+	以猜想到这两个函数就是操作多个 Reader 或 Writer 就像操作一个。
+		举两个例子来说明功能：
+		func main() {
+			readers := []io.Reader{
+				bytes.NewBufferString("hello zhangchenhao"),
+				strings.NewReader("hello welcome use multiReader"),
+			}
+
+			reader := io.MultiReader(readers...)
+
+			//创建两块存储区
+			buf := make([]byte, 0, 888)
+			tmp := make([]byte, 10)
+
+			for n, err := reader.Read(tmp); err != io.EOF; n, err = reader.Read(tmp) {
+				buf = append(buf, tmp[0:n]...)
+			}
+
+			fmt.Printf("%s\n", buf)
+		}
+		
+		先创建了一个io.Reader的slice，然后里面有两个io.Reader的实例,然后
+	通过MultiReader生成新的Reader，第一次调用Reader的Read方法获取到的是
+	slice中的第一个元素的内容，即MultiReader函数只是将多个Reader组合起来
+	，并不能通过调用一次Read方法获取所有Reader的内容。在所有的 Reader 内
+	容都被读完后，Reader 会返回 EOF。
+	
+		而MultiWriter是将多个Writer组合起来的，但是可以调用一次Write方法
+	为所有Writer写入。
+	
+		1.18 TeeReader函数
+		函数签名如下：
+		func TeeReader(r Reader, w Writer) Reader
+		该函数返回一个Reader，它将从r中读取到的数据写入到w中。
+		也就是说，我们通过 Reader 读取内容后，会自动写入到 Writer 中去。
+		
+		例如：
+			func main() {
+				reader := io.TeeReader(bytes.NewBufferString("hello func TeeReader!"), os.Stdout)
+
+				reader.Read(make([]byte, 10))
+			}
+			
+		这种功能的实现其实挺简单，无非是在 Read 完后执行 Write。
+
+	至此，io包所有接口与函数介绍完毕。有些许不常用的没有加进来（也不难）。

@@ -1,0 +1,47 @@
+
+1.1 Time类型的内部结构
+	type Time struct{
+		// sec gives the number of seconds elapsed since
+		// January 1, year 1 00:00:00 UTC.
+		sec int64
+
+		// nsec specifies a non-negative nanosecond
+		// offset within the second named by Seconds.
+		// It must be in the range [0, 999999999].
+		nsec int32
+
+		// loc specifies the Location that should be used to
+		// determine the minute, hour, month, day, and year
+		// that correspond to this Time.
+		// Only the zero Time has a nil Location.
+		// In that case it is interpreted to mean UTC.
+		loc *Location
+	}
+	
+	要想弄清time.Time结构，首先需要了解time.Now()函数
+	定义如下：
+		// Now returns the current local time.
+		func Now() Time {
+			sec, nsec := now()
+			return Time{sec + unixToInternal, nsec, Local}
+		}
+		now() 的具体实现在 runtime 包中
+		
+		可以从函数定义中看出，time.Now()中得到了sec和nsec。
+		return了一个time.Time类型，但是字段sec初始化为：
+		sec + unixToInternal代表Time结构中sec是从公元1年1月1日到现在的
+	秒数，而非Unix时间戳（1970-1-1到现在的秒数）。
+		
+		1.2 常用函数或方法
+		较多，不赘述。
+		
+		1.2.1 零值的判断
+		因为 Time 的零值是 sec 和 nsec 都是 0，表示 1 年 1 月 1 日。
+		Time.IsZero()方法用于判读是否是0值。
+		
+		1.2.2 与Unix时间戳的转换
+		time.Unix(sec, nsec int64) 通过 Unix 时间戳生成 time.Time 实例；
+		time.Time.Unix() 得到 Unix 时间戳；
+		time.Time.UnixNano() 得到 Unix 时间戳的纳秒表示；
+		
+		

@@ -50,3 +50,8 @@
 2019/12/25
 1.vendor n.卖主，供应商 2.vendored code n.第三方代码 3.relative adj.相对的
 n.亲戚 4.offset v.抵消n.偏移量
+
+2019/12/26
+1.polaris n.北极星 2.delimit vt.划界，定界限 3.peekn. 偷看; 一瞥vi. 窥视
+4.duration n.持续，期间 5.round n.圆，循环、绕过，四舍五入，向上取整
+6.truncate v.截断，向下取整

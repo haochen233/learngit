@@ -1,0 +1,18 @@
+	time 包提供了 Location 的两个实例：Local 和 UTC。Local代表当前系统本地
+时区，UTC代表通用协调时间，也就是零时区。time包默认使用UTC时区。
+	1.2 获得特定时区的实例
+		函数LoadLocation可以根据名称获取特定时区的实例。函数声明如下：
+		func LoadLocation(name string) (*Location, error)
+	
+		如果 name 是 "" 或 "UTC"，返回 UTC；如果 name 是 "Local"，
+	返回 Local。
+		否则 name 应该是 IANA 时区数据库里有记录的地点名，比如：
+		"Asia/Taipei"
+		"Asia/Chongqin"
+		"Asia/Shanghai"
+		等等
+		
+	1.3 总结
+		通常，我们使用 time.Local 即可，偶尔可能会需要使用 UTC。在解析时间
+	时，心中一定记得有时区这么回事。当你发现时间出现莫名的情况时，很可能是
+	因为时区的问题，特别是当时间相差 8 小时。

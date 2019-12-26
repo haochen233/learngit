@@ -1,0 +1,182 @@
+ bufio — 缓存IO
+	bufio 包实现了缓存IO。它包装了io.Reader和 io.Writer 对象，创建了另外的
+ Reader和Writer对象，它们也实现了 io.Reader 和 io.Writer 接口，不过它们是
+ 有缓存的。该包同时为文本I/O提供了一些便利操作。
+ 
+	1.1 Reader类型和方法
+		bufio.Reader结构包装了一个io.Reader对象，提供缓存功能，同时实现了
+	io.Reader接口。
+		结构定义如下：
+		type Reader struct{
+			buf		[]byte	
+			 rd           io.Reader    // 底层的io.Reader
+			// r:从buf中读走的字节（偏移）；w:buf中填充内容的偏移；
+			// w - r 是buf中可被读的长度（缓存数据的大小），也是Buffered()方法的返回值
+			r, w         int
+			err          error        // 读过程中遇到的错误
+			lastByte     int        // 最后一次读到的字节（ReadByte/UnreadByte)
+			lastRuneSize int        // 最后一次读到的Rune的大小 (ReadRune/UnreadRune)
+		}
+		
+		Reader结构中并没有任何导出的字段（即字段都是小写开头的）
+		
+		bufio包提供；两个实例化bufio.Reader对象的函数：NewReader和NewReaderSize
+	。其中，NewReader函数时调用NewReaderSize函数实现的。
+		 func NewReader(rd io.Reader) *Reader {
+			// 默认缓存大小：defaultBufSize=4096
+			return NewReaderSize(rd, defaultBufSize)
+		}
+		
+		我们看一下NewReaderSize的源码：
+
+    func NewReaderSize(rd io.Reader, size int) *Reader {
+        // 已经是bufio.Reader类型，且缓存大小不小于 size，则直接返回
+        b, ok := rd.(*Reader)
+        if ok && len(b.buf) >= size {
+            return b
+        }
+        // 缓存大小不会小于 minReadBufferSize （16字节）
+        if size < minReadBufferSize {
+            size = minReadBufferSize
+        }
+        // 构造一个bufio.Reader实例
+        return &Reader{
+            buf:          make([]byte, size),
+            rd:           rd,
+            lastByte:     -1,
+            lastRuneSize: -1,
+        }
+    }
+		
+	1.2 ReadSlice、ReadBytes、ReadString 和 ReadLine 方法
+		之所以将这几个方法放在一起，是因为他们有着类似的行为。事实上，
+	后三个方法最终都是调用ReadSlice来实现的。所以，我们先来看看ReadSlice
+	方法。
+		ReadSlice方法签名如下：
+		func (b *Reader) ReadSlice(delim byte) (line []byte, err error)
+		
+		ReadSlice 在 b 中查找 delim 并返回 delim 及其之前的所有数据的切片
+	该操作会读出数据，返回的切片是已读出数据的引用
+	切片中的数据在下一次读取操作之前是有效的
+	
+		ReadBytes方法签名如下：
+		func (b *Reader) ReadBytes(delim byte) (line []byte, err error)
+		而与ReadSlice不同的是，ReadBytes返回的是一份拷贝。
+		
+		ReadString方法
+		func (b *Reader) ReadString(delim byte) (line string, err error) 
+		它实际上是调用了ReadBytes方法，并将结果的[]byte转换为string类型
+		
+		ReadLine方法签名如下
+		func (b *Reader) ReadLine() (line []byte, isPrefix bool, err error)
+		ReadLine 是一个底层的原始行读取命令。许多调用者或许会使用 ReadByte
+		s('\n') 或者 ReadString('\n') 来代替这个方法。
+		
+		ReadLine 尝试返回单独的行，不包括行尾的换行符。如果一行大于缓存，is
+		Prefix 会被设置为 true，同时返回该行的开始部分（等于缓存大小的部分）
+		
+		该行剩余的部分就会在下次调用的时候返回。当下次调用返回该行剩余部分时
+		，isPrefix 将会是 false 。跟 ReadSlice 一样，返回的 line 只是 buffer
+		的引用，在下次执行IO操作时，line 会无效。
+		
+	1.3 Peek 方法
+		方法的签名如下：
+		func (b *Reader) Peek(n int) ([]byte, error)
+		同上面介绍的 ReadSlice一样，返回的 []byte 只是 buffer 中的引用，
+		在下次IO操作后会无效。
+
+	1.4 Scanner类型和方法
+		对于简单的读取一行，在 Reader 类型中，感觉没有让人特别满意的方法
+		。于是，Go1.1增加了一个类型：Scanner。官方关于Go1.1增加该类型的说
+		明如下：
+		
+		在 bufio 包中有多种方式获取文本输入，ReadBytes、ReadString 和独
+	特的 ReadLine，对于简单的目的这些都有些过于复杂了。在 Go 1.1 中，添
+	加了一个新类型，Scanner，以便更容易的处理如按行读取输入序列或空格分
+	隔单词等，这类简单的任务。它终结了如输入一个很长的有问题的行这样的输
+	入错误，并且提供了简单的默认行为：基于行的输入，每行都剔除分隔标识。
+	这里的代码展示一次输入一行：
+		
+		Scanner 类型和 Reader 类型一样，没有任何导出的字段，同时它也包装
+	了一个 io.Reader 对象，但它没有实现 io.Reader 接口。
+		定义如下：
+		type Scanner struct {
+			r            io.Reader // The reader provided by the client.
+			split        SplitFunc // The function to split the tokens.
+			maxTokenSize int       // Maximum size of a token; modified by tests.
+			token        []byte    // Last token returned by split.
+			buf          []byte    // Buffer used as argument to split.
+			start        int       // First non-processed byte in buf.
+			end          int       // End of data in buf.
+			err          error     // Sticky error.
+		}
+		
+	SplitFunc 类型定义如下：
+
+    type SplitFunc func(data []byte, atEOF bool) (advance int, token []byte, 
+	err error)
+SplitFunc 定义了 用于对输入进行分词的 split 函数的签名。参数 data 是还未处理
+的数据，atEOF 标识 Reader 是否还有更多数据（是否到了EOF）。返回值 advance 表
+示从输入中读取的字节数，token 表示下一个结果数据，err 则代表可能的错误。
+
+	 Scanner 的实例化
+	 func NewScanner(r io.Reader) *Scanner
+	 
+	 方法：
+	Scan 方法 该方法好比 iterator 中的 Next 方法，它用于将 Scanner 获取下一个
+token，以便 Bytes 和 Text 方法可用。当扫描停止时，它返回false，
+	Split 方法 前面我们提到过可以通过 Split 方法为 Scanner 实例设置分词行
+	为。由于 Scanner 实例的默认 split 总是 ScanLines，
+	Err 方法 前面已经提到，通过 Err 方法可以获取第一个遇到的错误（但如果错误是
+io.EOF，Err 方法会返回 nil）。
+
+	函数：
+	ScanBytes 返回单个字节作为一个 token。
+	ScanRunes 返回单个 UTF-8 编码的 rune 作为一个 token。
+	ScanWords 返回通过“空格”分词的单词。如：study golang，调用会返回study。
+	ScanLines 返回一行文本，不包括行尾的换行符。这里的换行包括了Windows下的
+"\r\n"和Unix下的"\n"。
+
+	这几个参数都可以作为Split方法的参数实例
+	
+	1.5 Writer类型和方法
+		bufio.Writer 结构包装了一个 io.Writer 对象，提供缓存功能，同时实现了 io.Writer
+	接口。
+
+	Writer 结构没有任何导出的字段，结构定义如下：
+
+    type Writer struct {
+        err error        // 写过程中遇到的错误
+        buf []byte        // 缓存
+        n   int            // 当前缓存中的字节数
+        wr  io.Writer    // 底层的 io.Writer 对象
+    }
+	相比 bufio.Reader, bufio.Writer 结构定义简单很多。
+	
+	Writer实例化
+	和 Reader 类型一样，bufio 包提供了两个实例化 bufio.Writer 对象的函数
+：NewWriter 和 NewWriterSize。其中，NewWriter 函数是调用 NewWriterSize 
+函数实现的：
+	func NewWriter(wr io.Writer) *Writer{
+		return NewWriterSize(wr, defaultBufSize)
+	}
+	
+	Available 和 Buffered 方法:
+	Available 方法获取缓存中还未使用的字节数（缓存大小 - 字段 n 的值）；
+	Buffered 方法获取写入当前缓存中的字节数（就是字段 n 的值）
+	
+	Flush方法:
+	该方法将缓存中的所有数据写入底层的io.Writer对象中。使用 bufio.Writer
+时，在所有的Write操作完成之后，应该调用Flush方法使得缓存都写入io.Writer 
+对象中。
+	
+	ReadWriter 类型和实例化:
+	
+	  type ReadWriter struct {
+        *Reader
+        *Writer
+    }
+	通过调用 bufio.NewReadWriter 函数来实现。
+	
+	
+	

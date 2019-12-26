@@ -1,0 +1,98 @@
+1.3. Print 序列函数	
+	这里说的 Print 序列函数包括：Fprint/Fprintf/Fprintln/Sprint/Sprintf/
+Sprintln/Print/Printf/Println。之所以将放在一起介绍，是因为它们的使用方式
+类似、参数意思也类似。
+	一般的，我们将 Fprint/Fprintf/Fprintln 归为一类；Sprint/Sprintf/Sprintln
+归为一类；Print/Printf/Println 归为另一类。
+	
+	Fprint/Fprintf/Fprintln 函数的第一个参数接收一个io.Writer类型，会将
+内容输出到 io.Writer 中去。而 Print/Printf/Println 函数是将内容输出到标
+准输出中，因此，直接调用 F类函数 做这件事，并将 os.Stdout 作为第一个参数
+传入。
+	Sprint/Sprintf/Sprintln 是格式化内容为 string 类型，而并不输出到某处，
+需要格式化字符串并返回时，可以用这组函数。
+
+1.4 Stringer接口
+	定义如下：
+	type Stringer interface {
+		String() string
+	}
+	
+	所以我们根据Go语言中实现接口的定义，一个类型只要有String() string方法
+，我们就说它实现了Stringer接口。
+	
+1.5 Formatter接口
+	定义如下：
+	type Formatter interface{
+		Format(f state, c rune)
+	}
+	
+	通过Formatter接口可以做到自定义输出格式（自定义占位符）
+	
+...
+
+	一般的，我们不需要实现该接口。
+	
+1.7 Scan序列函数
+	该序列函数和 Print 序列函数相对应，包括：Fscan/Fscanf/Fscanln/Sscan/
+Sscanf/Sscanln/Scan/Scanf/Scanln。
+	一般的，我们将Fscan/Fscanf/Fscanln归为一类；Sscan/Sscanf/Sscanln归为
+一类；Scan/Scanf/Scanln归为另一类。其中，Scan/Scanf/Scanln会调用相应的F开
+头一类函数。如：
+	func Scan(a ...interface{}) (n int, err error) {
+        return Fscan(os.Stdin, a...)
+    }
+	
+	这是因为F开头的函数Fscan/Fscanf/Fscanln 函数的第一个参数接收一个 
+io.Reader 类型，从其中读取内容并赋值给相应的实参。而 Scan/Scanf/Scanln 
+正是从标准输入获取内容，因此，直接调用 F类函数 做这件事，并将 os.Stdin 
+作为第一个参数传入。
+
+	Sscan/Sscanf/Sscanln 则直接从字符串中获取内容。
+	对于Scan/Scanf/Scanln三个函数的区别，我们通过例子来说明，为了方便讲
+解，我们使用Sscan/Sscanf/Sscanln这组函数。
+	1）Sscan/Fscan/Scan
+	例子：
+		var (
+			name string
+			age  int
+		)
+
+		n1, _ := Sscan("polaris\n18", &name, &age)
+		Println(n1, name, age)
+		n2, _ := Sscan("polaris 18", &name, &age)
+		Println(n2, name, age)
+	
+	输出结果是一样的，这组后面不带‘f’函数将连续由空格或'\n'（换行看做空格）
+分隔的值存储为连续的实参。
+	2) Scanf/FScanf/Sscanf
+	例子：
+		n1, _ := Sscanf("polaris\n18", "%s%d", &name, &age)    
+		Println(n1, name, age)                                 
+		n2, _ := Sscanf("polaris 18", "%s%d", &name, &age)     
+		Println(n2, name, age)        
+
+	输出结果为：
+		1 polaris 0
+		2 polaris 18
+	两次不一样，因为后面带f的在换行处停止扫描。
+	
+	3）Scanln/FScanln/Sscanln
+		和上一组一样，遇到”\n“停止扫描
+		
+	所以，一般上我们使用Scan/Scanf/Scanln这组函数
+	
+	
+	注意一种比较诡异的状况。
+		连续使用Scanf输入时会出现错误状况（输入一次。后面等待输入的其他
+	参数也有值了）。
+		这是Go在Windows下的bug，Linux下正常。
+		可以使用Scanln或Scanf("%s\n", &name)来代替。
+	
+1.8 Scanner 和 ScanState 接口
+	基本上，我们不会去自己实现这两个接口，只需要使用上文中相应的 Scan 
+函数就可以了。
+	任何实现了 Scan 方法的对象都实现了 Scanner 接口。
+	ScanState 是一个交给用户定制的 Scanner 接口的参数的接口。
+	
+	

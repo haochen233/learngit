@@ -1,0 +1,43 @@
+1.1. 解析路径名字符串	
+	path/filepath 包涉及到路径操作时，路径分隔符使用 os.PathSeparator
+不管是什么系统平台，在Go语言里是统一的。
+	
+	Dir() 和 Base() 函数将一个路径名字符串分解成目录和文件名两部分。
+	Base 函数返回路径的最后一个元素。在提取元素前会去掉末尾的斜杠。
+如果路径是 ""，会返回 "."；如果路径是只有一个斜杆构成的，会返回 "/"。
+	
+	Dir 返回路径中除去最后一个路径元素的部分，即该路径最后一个元素
+所在的目录。
+
+	例如：
+	s := filepath.Dir("d:/1/2/3")
+	Println(s)
+
+	s2 := filepath.Base("/1/2/1.txt")
+	Println(s2)
+	
+	输出：
+	d:\1\2
+	1.txt
+	
+	此外，Ext函数 可以获得路径中文件名的扩展名。
+	func Ext(path string) string
+	Ext 函数返回 path 文件扩展名。扩展名是路径中最后一个
+从 '.' 开始的部分。包括 '.' 。
+	如果没有'.'会返回空字符串。
+	
+	1.2. 相对路径和绝对路径
+	
+		绝对路径，在 Unix 中，以 / 开始；
+		在 Windows 下以某个盘符开始，比如 C:\Program Files。
+		
+		函数ISAbs判断路径是否是绝对路径
+		func IsAbs(path string) bool
+		
+		而函数Abs(path string) (string, error)
+		Abs 返回path路径的绝对路径
+		
+		
+		
+	
+		

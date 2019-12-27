@@ -1,0 +1,132 @@
+定时器：
+	定时器是进程规划自己在未来某一时刻接获通知的一种机制。介绍两种计时器：
+Timer（到达指定时间触发且只触发一次）和Ticker（间隔特定时间触发）。
+
+1.1 Timer 
+	
+	1.1.1 内部实现源码分析
+		Timer类型代表单次时间事件，当Timer到期时，当时的时间会被发送给
+	C channel)，除非 Timer 是被 AfterFunc 函数创建的。
+		
+		Timer类型定义如下：
+			type Timer struct{
+				C <- chan Time	//一个只读管道(类型为time.Time)
+				r runtimeTimer
+			}
+		Timer的实例必须通过 NewTimer 或 AfterFunc 获得。
+		
+		runtimeTimer。它定义在sleep.go 文件中，必须和runtime包中time.go文件中的
+	timer必须保持一致：
+	
+	1.1.2 Timer 相关函数或方法的使用
+		通过 time.After 模拟超时：
+		func After(d Duration) <-chan Time {
+			return NewTimer(d).C
+		}
+		
+		返回一个一个无缓冲只读管道(类型为time.Time)，即一定时间后会有数据
+	写入管道，然后就可以读出来了。
+		
+		例：
+			c := make(chan int)
+
+			go func() {
+				// time.Sleep(1 * time.Second)
+				time.Sleep(3 * time.Second)
+				<-c
+			}()
+
+			select {
+			case c <- 1:
+				fmt.Println("channel...")
+			case <-time.After(2 * time.Second):
+				close(c)
+				fmt.Println("timeout...")
+			}
+	1.1.3 Timer.Stop 停止定时器 或 Timer.Reset 重置定时器
+		Stop功能是移除一个未触发的定时器，并返回true。
+		Reset功能是废弃之前的定时器，重新设置一个定时器。
+	
+		Stop方法调用例子：
+				timer := NewTimer(2 * Second)
+				c := make(chan int)
+
+				go func() {
+					Sleep(1 * Second)
+					if timer.Stop() {
+						Println("stop timer")
+					}
+					Sleep(5 * Second)
+					<-c
+				}()
+
+				select {
+				case c <- 1:
+					Println("channel...")
+				case <-timer.C:
+					close(c)
+					Println("timeout")
+				}
+		
+		如果定时器还未触发，Stop 会将其移除，并返回 true；否则返回 false
+	；后续再对该 Timer 调用 Stop，直接返回 false。
+	
+		Reset例子：
+			timer := NewTimer(2 * Second)
+			c := make(chan int)
+
+			go func() {
+				Sleep(1 * Second)
+				if timer.Reset(6 * Second) {
+					Println("Reset timer")
+				}
+				Sleep(5 * Second)
+				<-c
+			}()
+
+			select {
+			case c <- 1:
+				Println("channel...")
+			case <-timer.C:
+				close(c)
+				Println("timeout")
+			}
+
+		Reset 会先调用 stopTimer 再调用 startTimer，类似于废弃之前的定时
+	器，重新启动一个定时器。返回值和 Stop 一样。
+		
+		1.1.3 Sleep的内部实现
+			在runtime/time.go中的 timeSleep 可知 Sleep是通过Timer实现的，把
+		当前Goroutine作为arg参数
+	
+	1.2 Ticker相关函数或方法的使用
+		Ticker 和 Timer 类似，区别是：Ticker 中的 runtimeTimer 字段的 period 
+	字段会赋值为 NewTicker(d Duration) 中的 d，表示每间隔 d 纳秒，定时器
+	就会触发一次。
+		例子：
+			timer := NewTimer(2 * Second)
+			ticker := NewTicker(2 * Second)
+			c := make(chan int)
+
+			go func() {
+				if timer.Reset(9 * Second) {
+					Println("Reset timer")
+				}
+				Sleep(5 * Second)
+				<-c
+			}()
+
+			for {
+				select {
+				case c <- 1:
+					Println("channel...")
+				case <-timer.C:
+					ticker.Stop()
+					Println("用Timer关闭Ticker")
+					close(c)
+					Println("Timer timeout")
+					return
+				case <-ticker.C:
+					Println("Ticker timeout")
+				}
+			}

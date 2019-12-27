@@ -32,9 +32,9 @@
 		sec + unixToInternal代表Time结构中sec是从公元1年1月1日到现在的
 	秒数，而非Unix时间戳（1970-1-1到现在的秒数）。
 		
-		1.2 常用函数或方法
-		较多，不赘述。
-		
+	1.2 常用函数或方法
+	较多，不赘述。
+	
 		1.2.1 零值的判断
 		因为 Time 的零值是 sec 和 nsec 都是 0，表示 1 年 1 月 1 日。
 		Time.IsZero()方法用于判读是否是0值。
@@ -44,4 +44,21 @@
 		time.Time.Unix() 得到 Unix 时间戳；
 		time.Time.UnixNano() 得到 Unix 时间戳的纳秒表示；
 		
+		1.2.3 格式化解析
+		time.Parse 和 time.ParseInLocation
+		time.Time.Format	
+	
+		1.2.4 实现 序列化 / 反序列化 相关接口
+			略。
 		
+		Round 和 Truncate 方法
+		//把Duration类型的单位向下取整 Method Truncate（只能舍去）
+		Println(t1.Truncate(Hour))
+
+		//Println(t1.Truncate(Minute))
+		//Println(t1.Truncate())
+
+		//把Duration类型的单位向下或向上取整 Method Round(根据四舍五入，
+		既能舍也能入，接近那个整点就往哪边靠近，比如：10:29:10，根据Hour
+		来进行舍入。调用Round，因为更靠近10点所以是10点)
+		//Println(t1.Round(Hour))	

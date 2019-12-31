@@ -412,5 +412,13 @@ CP、UDP都是在IP的基础上实现的协议，所以IP属于一种底层协�
 	隔开，比如“IP4:IP” 或“IP4:4”，参数laddr是服务器本地地址，
 		成功返回IPConn对象，失败返回一个错误类型。
 		
-	
+	11.6.5 ping 程序设计
+		不管是UNIX还是Windows系统中都有一个Ping命令，利用Ping
+	命令可以检查网络是否连通，分析判断网络故障。
+		Ping会向目标主机发送测试数据包，看对方是否有响应，并且
+	统计响应时间，以此测试网络。
+		Ping命令使用IP层的ICMP实现的，源主机向目标主机发送回显
+	请求报文（ICMP_ECHO_REQUEST， type=8，code=0），目的主机返
+	回回显响应报文（ICMP_ECHO_REPLY，type=0，code=0）
+		
 		

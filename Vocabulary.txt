@@ -65,3 +65,6 @@ n.亲戚 4.offset v.抵消n.偏移量
 
 2020/01/04
 1.foundry n.铸造，铸造厂 2.registry n.注册，登记处
+
+2020/01/05
+1.click v.点击

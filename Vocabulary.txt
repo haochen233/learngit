@@ -68,3 +68,8 @@ n.亲戚 4.offset v.抵消n.偏移量
 
 2020/01/05
 1.click v.点击
+
+2020/01/06
+1.policy n.政策 2.complicate v.使复杂，使卷入 3.interactive adj.
+交互式的，交互的 4.daemon n.守护进程，后台程序 5.layer n.v.层，分层
+6.framework n.框架，结构 7.latest adj.最新的，最迟的、最旧的

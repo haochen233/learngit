@@ -76,3 +76,7 @@ n.亲戚 4.offset v.抵消n.偏移量
 
 2020/01/14
 1.archive n.档案文件，档案馆 vt.把...存档 2.registry n.注册，登记
+
+2020/01/19
+1.decode n.解码，译码 2.encode n.编码 3.module n.模块，组件  
+4.privacy n.隐私，秘密

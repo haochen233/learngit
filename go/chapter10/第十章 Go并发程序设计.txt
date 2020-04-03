@@ -201,10 +201,10 @@
 	，或只能发送。
 	
 		只能接收的Channel变量定义形式如下：
-		var chanName chan <- ElementType
+		var chanName <- chan  ElementType
 		
 		只能发送的Channel变量定义形式如下：
-		var chanName <- chan ElementType
+		var chanName  chan <- ElementType
 		
 	同时单向Channel还可以通过双向Channel经过类型转换得来
 		例如：
